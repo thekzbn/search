@@ -251,7 +251,8 @@ MIT [License](LICENSE) — free for personal and commercial use.
 ## 📬 Support
 
 - **Issues**: [GitHub Issues](https://github.com/thekzbn/search/issues)
-- **Original**: [thekzbn.name.ng](https://thekzbn.name.ng)
+- **Portfolio**: [thekzbn.name.ng](https://thekzbn.name.ng)
+- **Email**: [thekzbn.dev@gmail.com](mailto:thekzbn.dev@gmail.com)
 - **Demo**: [search.thekzbn.name.ng](https://search.thekzbn.name.ng)
 
 **Happy forking!** 🚀
