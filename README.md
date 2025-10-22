@@ -1,180 +1,257 @@
-# thekzbn Search
+# 🔎 thekzbn Search
 
-A modern, multi-engine web search tool hosted at [search.thekzbn.name.ng](https://search.thekzbn.name.ng). This project allows users to search the web using multiple search engines, including Google, YouTube, Claude, Claude Docs, Claude Projects, Perplexity, SearchGPT, Bing, DuckDuckGo, Yahoo, and Yandex, with a sleek, user-friendly interface optimized for both desktop and mobile devices.
+A lightweight, multi-engine web search interface for querying 12 platforms — Google (Web, Images), YouTube, Claude (AI, Docs, Projects), Perplexity, SearchGPT, Bing, DuckDuckGo, Yahoo, and Yandex — from a single, responsive portal. Fork this to create your own search tool or run it locally.
 
-## Features
+> **Live Demo**: [search.thekzbn.name.ng](https://search.thekzbn.name.ng)
 
-- **Multi-Engine Search**: Choose from 12 search engines, including Google (Web and Images), YouTube, Claude (AI, Docs, Projects), Perplexity, SearchGPT, Bing, DuckDuckGo, Yahoo, and Yandex.
-- **Responsive Design**: Optimized for desktop and mobile, with a mobile-friendly history panel and visible close button.
-- **SEO Optimized**: Includes meta tags, structured data (JSON-LD), canonical URLs, Google Search Console verification, and a sitemap for better indexing.
-- **Search History**: Stores recent searches in localStorage, with options to view, repeat, or clear history.
-- **Google Autocomplete**: Provides real-time search suggestions powered by Google's autocomplete API (via CORS proxy).
-- **Keyboard Shortcuts**: Supports `Ctrl+K` (or `⌘+K` on Mac) to focus the search input and `Ctrl+H` (or `⌘+H`) to toggle history.
-- **Visual Effects**: Features animated gradients, hover effects, and a loading spinner for a polished user experience.
-- **Accessibility**: Uses semantic HTML and ARIA attributes for better accessibility.
-- **Dark Mode**: Automatically adapts to the user's system dark mode preference.
+---
 
-## Tech Stack
+## ✨ Features
 
-- **HTML5**: Semantic structure with SEO enhancements.
-- **CSS3**: Custom styles with Boxicons for icons and responsive design.
-- **JavaScript**: Handles search functionality, history management, and Google autocomplete integration.
-- **Boxicons**: Icon library for search engine icons (loaded via CDN).
-- **CORS Proxy**: Used for fetching Google autocomplete suggestions.
+- **Multi-Engine Search**: Supports Google (Web, Images, no AI with `udm=14`), YouTube, Claude (AI, Docs, Projects), Perplexity, SearchGPT, Bing, DuckDuckGo, Yahoo, and Yandex.
+- **Autocomplete Suggestions**: Powered by Google's API (via CORS proxy).
+- **Search History**: Stored in `localStorage` with view, repeat, and clear options.
+- **Keyboard Shortcuts**: `Ctrl+K` (or `⌘+K`) to focus search, `Ctrl+H` (or `⌘+H`) to toggle history.
+- **Responsive Design**: Mobile-friendly with a touch-optimized history panel.
+- **Dark Mode**: Auto-adapts to system theme.
+- **Accessibility**: Semantic HTML and ARIA attributes.
+- **Lightweight**: Pure HTML, CSS, and JavaScript — no build tools needed.
 
-## File Structure
+---
+
+## 🧩 File Structure
 
 ```
-search.thekzbn.name.ng/
+thekzbn-search/
 ├── assets/
 │   ├── css/
-│   │   └── style.css       # Styles for the search interface
+│   │   └── style.css       # Search interface styles
 │   ├── js/
-│   │   └── script.js       # JavaScript for search functionality
+│   │   └── script.js       # Search and autocomplete logic
 │   └── img/
-│       ├── logo.png        # thekzbn logo
-│       └── favicon.ico     # Favicon for the site
+│       ├── logo.png        # Project logo
+│       └── favicon.ico     # Favicon
 ├── index.html              # Main HTML file
 ├── google999b64546ebf668a.html # Google Search Console verification file
-├── robots.txt              # Crawler instructions
-└── sitemap.xml             # Sitemap for SEO
+└── README.md               # This file
 ```
 
-## Setup Instructions
+> **⚠️ Note**: `google999b64546ebf668a.html` is for **thekzbn's Google Search Console verification**. **Remove or replace it** when forking!
+
+---
+
+## 🚀 Quick Start
 
 ### Prerequisites
-- A web server (e.g., Nginx, Apache) to host the files.
-- A domain or subdomain (e.g., `search.thekzbn.name.ng`).
-- Access to a CORS proxy (e.g., `https://corsproxy.io/`) for Google autocomplete API.
-- A Google Search Console account for domain verification and sitemap submission.
+- **Git**: To clone the repository.
+- **Node.js** or **Python**: For running a local server.
+- **CORS Proxy**: Required for Google autocomplete.
 
 ### Installation
-1. **Clone or Download the Repository**:
-   - Copy the provided `index.html`, `assets/css/style.css`, and `assets/js/script.js` files into your project directory.
-   - Ensure the `assets/img/` directory contains `logo.png` and `favicon.ico`.
-   - Place the `google999b64546ebf668a.html` file in the root directory (`/search.thekzbn.name.ng/`) for Google Search Console verification.
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/thekzbn/search.git
+   cd search
+   ```
 
-2. **Create and Deploy Sitemap**:
-   - Create a `sitemap.xml` file in the root directory with the following content:
-     ```xml
-     <?xml version="1.0" encoding="UTF-8"?>
-     <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-         <url>
-             <loc>https://search.thekzbn.name.ng/</loc>
-             <lastmod>2025-10-22</lastmod>
-             <changefreq>daily</changefreq>
-             <priority>1.0</priority>
-         </url>
-         <url>
-             <loc>https://thekzbn.name.ng/</loc>
-             <lastmod>2025-10-22</lastmod>
-             <changefreq>weekly</changefreq>
-             <priority>0.8</priority>
-         </url>
-     </urlset>
-     ```
-   - Ensure `sitemap.xml` is accessible at `https://search.thekzbn.name.ng/sitemap.xml`.
+2. **Handle Google Verification File**:
+   ```bash
+   # Option 1: Remove it (recommended for local dev)
+   rm google999b64546ebf668a.html
+   
+   # Option 2: Keep it temporarily (for testing thekzbn's verification)
+   # Don't commit it back to your fork
+   ```
 
-3. **Configure the Web Server**:
-   - Host the files on a web server at `search.thekzbn.name.ng`.
-   - Ensure the server supports HTTP/2 and compression (Gzip or Brotli) for performance.
-   - Set cache headers for `style.css`, `script.js`, and `boxicons.min.css` (e.g., `Cache-Control: public, max-age=2592000`).
-   - Verify that `google999b64546ebf668a.html` is accessible at `https://search.thekzbn.name.ng/google999b64546ebf668a.html` for Google’s verification process.
-   - Ensure `sitemap.xml` is served with the correct MIME type (`text/xml`).
+3. **Run Locally**:
+   ```bash
+   # Node.js
+   npm install -g http-server
+   http-server -p 8080
+   
+   # Python
+   python -m http.server 8080
+   
+   # VS Code Live Server
+   # Right-click index.html → "Open with Live Server"
+   ```
+   Open `http://localhost:8080`.
 
-4. **Create and Deploy robots.txt**:
-   - Place `robots.txt` in the root directory with the following content:
-     ```
-     User-agent: *
-     Allow: /
-     Sitemap: https://search.thekzbn.name.ng/sitemap.xml
-     ```
-   - Ensure `robots.txt` is accessible at `https://search.thekzbn.name.ng/robots.txt`.
+4. **Set Up CORS Proxy**:
+   ```bash
+   # Clone and run cors-anywhere
+   git clone https://github.com/Rob--W/cors-anywhere.git
+   cd cors-anywhere
+   npm install
+   node server.js
+   ```
+   Update `script.js`:
+   ```javascript
+   const proxyUrl = 'http://localhost:8081/'; // Your proxy
+   ```
 
-5. **Verify with Google Search Console**:
-   - Log in to [Google Search Console](https://search.google.com/search-console).
-   - Add `search.thekzbn.name.ng` as a property.
-   - Use the HTML file verification method by confirming that `https://search.thekzbn.name.ng/google999b64546ebf668a.html` is accessible.
-   - Submit the sitemap (`https://search.thekzbn.name.ng/sitemap.xml`) for indexing.
+5. **Test**:
+   - Search across all 12 engines.
+   - Verify autocomplete works.
+   - Test mobile view (`Ctrl+Shift+M` in Chrome).
+   - Debug CORS errors in the console.
 
-6. **Submit to Other Search Engines**:
-   - Submit `https://search.thekzbn.name.ng/sitemap.xml` to:
-     - Bing Webmaster Tools (for Bing and Yahoo).
-     - Yandex Webmaster.
-   - Ensure the site is linked from `https://thekzbn.name.ng` for crawlability.
+### Deployment
+1. **Remove Google Verification File**:
+   ```bash
+   rm google999b64546ebf668a.html
+   git add .
+   git commit -m "Remove domain-specific verification file"
+   ```
 
-7. **Test the Application**:
-   - Open `https://search.thekzbn.name.ng` in a browser.
-   - Verify search functionality across all engines, history panel, and mobile responsiveness.
-   - Check console for errors (e.g., CORS issues with Google autocomplete).
-   - Confirm Google Search Console verification by checking the property status.
-   - Verify sitemap accessibility and submission status in Search Console.
+2. **Deploy to Static Host**:
+   | Platform | Command/Link |
+   |----------|-------------|
+   | **Netlify** | `netlify deploy` |
+   | **Vercel** | `vercel` |
+   | **GitHub Pages** | Settings → Pages → Deploy |
+   | **Cloudflare Pages** | Dashboard → Create Project |
 
-## Usage
+3. **Add Your Own SEO** (optional):
+   ```bash
+   # Create sitemap.xml
+   touch sitemap.xml
+   
+   # Create robots.txt
+   touch robots.txt
+   ```
 
-1. **Search**:
-   - Enter a query in the search input.
-   - Select a search engine from the dropdown (e.g., Google, Claude, Perplexity).
-   - Press `Enter` or click the submit button to search in a new tab.
-   - Use `Ctrl+K` (or `⌘+K` on Mac) to focus the input.
+---
 
-2. **History**:
-   - Click the history button (top-left) or press `Ctrl+H` (or `⌘+H`) to view recent searches.
-   - Click a history item to repeat the search.
-   - Use the trash icon to clear history.
+## ⚙️ Customization
 
-3. **Suggestions**:
-   - Start typing to see autocomplete suggestions from Google and search history.
-   - Use arrow keys to navigate suggestions and `Enter` to select.
+### Quick Customizations
 
-## Search Engines
+| What | File | How |
+|------|------|-----|
+| **Add Engine** | `script.js` | Add to `engines` object |
+| **Change Logo** | `assets/img/logo.png` | Replace with your 150×150px image |
+| **Change Colors** | `style.css` | Edit `:root` CSS variables |
+| **Default Engine** | `script.js` | Set `defaultEngine` |
+| **Meta Tags** | `index.html` | Edit `<title>`, `<meta name="description">` |
 
-- **Google (No AI Bullshit)**: Web search with AI results disabled (`udm=14`).
-- **Google Images**: Image search via Google.
-- **YouTube**: Video search on YouTube.
-- **Claude**: General AI-powered search via Anthropic.
-- **Claude Docs**: Search Anthropic's documentation.
-- **Claude Projects**: Search Anthropic's project-related content.
-- **Perplexity**: AI-driven search with contextual answers.
-- **SearchGPT**: AI-enhanced search via OpenAI's ChatGPT integration.
-- **Bing**: Web search via Microsoft Bing.
-- **DuckDuckGo**: Privacy-focused web search.
-- **Yahoo**: Web search via Yahoo (powered by Bing).
-- **Yandex**: Web search via Yandex.
+### Example: Add Custom Search Engine
+1. In `script.js`:
+   ```javascript
+   const engines = {
+       // ... existing engines
+       custom: {
+           url: "https://customsearch.com/search?q=",
+           name: "Custom Search",
+           icon: "<i class='bx bx-search'></i>",
+           color: "#yourcolor"
+       }
+   };
+   ```
 
-## SEO Optimizations
+2. In `index.html`:
+   ```html
+   <option value="custom"><i class='bx bx-search'></i> Custom Search</option>
+   ```
 
-- **Meta Tags**: Includes `title`, `description`, `keywords`, `robots`, and Open Graph/Twitter Card tags.
-- **Structured Data**: JSON-LD for `WebSite` and `SearchAction` to enhance rich snippets.
-- **Canonical URL**: Prevents duplicate content issues.
-- **Sitemap**: `sitemap.xml` guides crawlers for better indexing.
-- **Robots**: `robots.txt` allows crawling and references the sitemap.
-- **Google Search Console Verification**: Uses `google999b64546ebf668a.html` for domain ownership verification.
-- **Performance**: Uses external CSS/JS, CDN for Boxicons, and lightweight assets.
-- **Mobile-Friendly**: Responsive design with fixed mobile history panel close button.
+3. Done! Refresh and select your engine.
 
-## Notes
+### Example: Rebrand Colors
+In `style.css`:
+```css
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --button-blue: #your-brand-color;
+}
+```
 
-- **CORS Proxy**: The Google autocomplete API requires a CORS proxy (`https://corsproxy.io/`). Replace with your own proxy if needed for reliability.
-- **SearchGPT URL**: Currently uses `https://chat.openai.com/?q=`, as SearchGPT lacks a dedicated search URL. Update if a specific endpoint becomes available.
-- **Claude URLs**: Assumes standard Anthropic endpoints (`www.anthropic.com/search`, `docs.anthropic.com/search`, `www.anthropic.com/projects/search`). Verify and update if necessary.
-- **BuiltWith Compatibility**: The tech stack (HTML5, CSS3, JavaScript, Boxicons) is detectable by BuiltWith due to clear CDN usage and MIME types.
-- **Google Verification File**: Ensure `google999b64546ebf668a.html` remains in the root directory and is not modified to maintain Search Console verification.
-- **Sitemap Maintenance**: Update the `<lastmod>` date in `sitemap.xml` whenever significant changes are made to the site (e.g., new search engines or content updates).
+---
 
-## Contributing
+## 🌍 SEO Setup (Optional)
 
-Contributions are welcome! Please:
-1. Fork the repository (if hosted on a platform like GitHub).
-2. Create a feature branch (`git checkout -b feature-name`).
-3. Commit changes (`git commit -m "Add feature"`).
-4. Push to the branch (`git push origin feature-name`).
-5. Open a pull request.
+For your forked deployment:
+1. **Google Search Console**:
+   ```bash
+   # Get your verification file from GSC
+   # Save as: googleYOURCODE.html
+   # Place in root directory
+   ```
 
-## License
+2. **Create `sitemap.xml`**:
+   ```xml
+   <?xml version="1.0" encoding="UTF-8"?>
+   <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+       <url>
+           <loc>https://yourdomain.com/</loc>
+           <priority>1.0</priority>
+       </url>
+   </urlset>
+   ```
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+3. **Create `robots.txt`**:
+   ```
+   User-agent: *
+   Allow: /
+   Sitemap: https://yourdomain.com/sitemap.xml
+   ```
 
-## Contact
+4. **Submit**:
+   - Google Search Console → Sitemaps → Add `sitemap.xml`
+   - Bing Webmaster Tools → Sitemaps
+   - Yandex Webmaster → Sitemaps
 
-For issues or suggestions, contact thekzbn via [thekzbn.name.ng](https://thekzbn.name.ng) or open an issue on the repository (if applicable).
+---
+
+## 🛠️ Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| **Autocomplete not working** | Check CORS proxy URL in `script.js` |
+| **Icons missing** | Verify internet connection (Boxicons CDN) |
+| **Mobile history close button missing** | Check `style.css` mobile media queries |
+| **Search URLs broken** | Update `engines` object in `script.js` |
+| **Local server CORS errors** | Use `http-server --cors "*"` |
+
+---
+
+## 🧠 Developer Tips
+
+- **Fork Clean**: Remove `google999b64546ebf668a.html` before your first commit.
+- **Proxy Reliability**: Host your own CORS proxy for production.
+- **HTTPS Required**: Boxicons CDN and autocomplete need HTTPS.
+- **Cache Busting**: Add `?v=1` to CSS/JS URLs after major changes.
+- **Testing Engines**: Use browser dev tools Network tab to verify search URLs.
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repo.
+2. Create feature branch: `git checkout -b feature/add-engine`
+3. Commit: `git commit -m "Add new search engine"`
+4. Push: `git push origin feature/add-engine`
+5. Open Pull Request.
+
+**Good first issues**:
+- Add new search engines.
+- Improve mobile UX.
+- Fix edge cases.
+- Add accessibility features.
+
+---
+
+## 🧾 License
+
+MIT [License](LICENSE) — free for personal and commercial use.
+
+
+
+---
+
+## 📬 Support
+
+- **Issues**: [GitHub Issues](https://github.com/thekzbn/search/issues)
+- **Original**: [thekzbn.name.ng](https://thekzbn.name.ng)
+- **Demo**: [search.thekzbn.name.ng](https://search.thekzbn.name.ng)
+
+**Happy forking!** 🚀
