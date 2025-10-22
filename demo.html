@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Multi‑Search — Enhanced</title>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f7f8fb;
+            --fg: #222;
+            --card: rgba(255, 255, 255, 0.75);
+            --accent: #4285f4;
+            /* default Google blue */
+            --glass-border: rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            font-family: Inter, Segoe UI, system-ui, Arial, Helvetica, sans-serif;
+            background: radial-gradient(circle at 10% 10%, #fbfcfe, #eef0f5);
+            color: var(--fg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px
+        }
+
+        .wrap {
+            max-width: 900px;
+            width: 100%
+        }
+
+        .search-card {
+            position: relative;
+            background: var(--card);
+            backdrop-filter: blur(8px) saturate(140%);
+            border-radius: 18px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 10px 30px rgba(20, 20, 30, 0.06);
+            padding: 18px;
+            display: flex;
+            gap: 12px;
+            align-items: center
+        }
+
+        /* input */
+        .search-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 14px 12px;
+            font-size: 16px;
+            outline: none
+        }
+
+        .search-left {
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .engine-select {
+            appearance: none;
+            border: none;
+            background: transparent;
+            padding: 8px 10px;
+            border-left: 1px solid var(--glass-border);
+            font-weight: 600;
+            border-radius: 10px
+        }
+
+        /* dynamic submit */
+        .submit-btn {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .submit-btn:active {
+            transform: translateY(1px)
+        }
+
+        /* clear button */
+        .clear-btn {
+            background: transparent;
+            border: none;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: none
+        }
+
+        /* placeholder rotation */
+        .placeholder-rotator {
+            margin-bottom: 10px;
+            opacity: 0.9;
+            font-size: 14px;
+            color: rgba(0, 0, 0, 0.6)
+        }
+
+        /* suggestions */
+        .suggestions {
+            position: absolute;
+            left: 18px;
+            right: 18px;
+            top: 74px;
+            background: var(--card);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 6px;
+            box-shadow: 0 10px 30px rgba(20, 20, 30, 0.06);
+            max-height: 320px;
+            overflow: auto;
+            display: none;
+            z-index: 60
+        }
+
+        .suggestions.show {
+            display: block
+        }
+
+        .suggestion {
+            padding: 10px 12px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer
+        }
+
+        .suggestion:hover {
+            background: rgba(66, 133, 244, 0.06)
+        }
+
+        .suggestion .type {
+            font-size: 12px;
+            opacity: 0.6
+        }
+
+        /* history & controls */
+        .controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 12px
+        }
+
+        .prefs-btn {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer
+        }
+
+        /* small */
+        @media(max-width:600px) {
+            .search-card {
+                flex-direction: column;
+                align-items: stretch
+            }
+
+            .suggestions {
+                top: 120px
+            }
+        }
+
+        /* dark theme tweaks */
+        @media(prefers-color-scheme:dark) {
+            :root {
+                --card: rgba(24, 24, 26, 0.6);
+                --bg: #0f0f12;
+                --fg: #e8e8e8;
+                --glass-border: rgba(255, 255, 255, 0.06)
+            }
+
+            body {
+                background: radial-gradient(circle at 10% 10%, #0d0d0f, #070708)
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="placeholder-rotator" id="placeholderRotator">Try: "how to deploy a react app"</div>
+
+        <div class="search-card" id="searchCard">
+            <div class="search-left">
+                <button class="clear-btn" id="voiceBtn" title="Voice search" aria-label="Voice search"><i
+                        class='bx bx-microphone'></i></button>
+            </div>
+
+            <input class="search-input" id="searchInput" placeholder="Search the web..." autocomplete="off"
+                aria-label="Search input" />
+
+            <select class="engine-select" id="engineSelect" aria-label="Search engine">
+                <option value="google-web">Google — Classic</option>
+                <option value="google-images">Google Images</option>
+                <option value="google-videos">Google Videos</option>
+                <option value="bing">Bing</option>
+                <option value="duckduckgo">DuckDuckGo</option>
+                <option value="yahoo">Yahoo</option>
+                <option value="yandex">Yandex</option>
+            </select>
+
+            <button class="submit-btn" id="submitBtn" aria-label="Search"><i class='bx bx-search'
+                    id="submitIcon"></i><span id="submitLabel">Search</span></button>
+            <button class="clear-btn" id="clearInput" title="Clear" aria-label="Clear input"><i
+                    class='bx bx-x'></i></button>
+
+            <div class="suggestions" id="suggestions" role="listbox" aria-label="Suggestions"></div>
+        </div>
+
+        <div class="controls">
+            <button class="prefs-btn" id="manageEngines">Manage engines</button>
+            <button class="prefs-btn" id="exportHistory">Export history</button>
+            <div style="margin-left:auto;opacity:0.8;font-size:13px">Searches today: <span id="searchCount">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- engine manager modal (simple) -->
+    <div id="engineModal"
+        style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;z-index:80">
+        <div
+            style="background:var(--card);padding:18px;border-radius:12px;width:90%;max-width:560px;border:1px solid var(--glass-border)">
+            <h3 style="margin:0 0 12px">Custom Engines</h3>
+            <div id="engineList"></div>
+            <div style="display:flex;gap:8px;margin-top:12px">
+                <input id="newEngineName" placeholder="Label e.g. Google (EU)"
+                    style="flex:1;padding:8px;border:1px solid var(--glass-border);border-radius:8px" />
+                <input id="newEngineUrl" placeholder="Search URL (use %s for query)"
+                    style="flex:1;padding:8px;border:1px solid var(--glass-border);border-radius:8px" />
+            </div>
+            <div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-end">
+                <button id="addEngineBtn" class="prefs-btn">Add</button>
+                <button id="closeEngineModal" class="prefs-btn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Utilities
+        const $ = sel => document.querySelector(sel);
+        const qs = sel => Array.from(document.querySelectorAll(sel));
+
+        // Elements
+        const input = $('#searchInput');
+        const engineSelect = $('#engineSelect');
+        const submitBtn = $('#submitBtn');
+        const submitIcon = $('#submitIcon');
+        const submitLabel = $('#submitLabel');
+        const suggestionsEl = $('#suggestions');
+        const placeholderRotator = $('#placeholderRotator');
+        const clearInputBtn = $('#clearInput');
+        const voiceBtn = $('#voiceBtn');
+        const manageEnginesBtn = $('#manageEngines');
+        const engineModal = $('#engineModal');
+        const engineList = $('#engineList');
+        const addEngineBtn = $('#addEngineBtn');
+        const closeEngineModal = $('#closeEngineModal');
+        const newEngineName = $('#newEngineName');
+        const newEngineUrl = $('#newEngineUrl');
+        const exportHistoryBtn = $('#exportHistory');
+        const searchCountEl = $('#searchCount');
+
+        // State
+        let placeholders = [
+            'Search the web...',
+            'how to deploy a react app',
+            'compare iphone 15 vs pixel 9',
+            'recipes: pasta carbonara',
+            'weather Lagos',
+        ];
+        let phIndex = 0;
+        let suggestionTimer = 0;
+        let suggestions = [];
+        let searchHistory = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+        let searchCount = parseInt(localStorage.getItem('searchCount') || '0');
+        const lastResetDateKey = 'lastResetDate';
+
+        // Custom engines stored in localStorage
+        let customEngines = JSON.parse(localStorage.getItem('customEngines') || '[]');
+        const defaultEngines = [
+            { value: 'google-web', label: 'Google — Classic', url: 'https://www.google.com/search?q=%s' },
+            { value: 'google-images', label: 'Google Images', url: 'https://www.google.com/search?tbm=isch&q=%s' },
+            { value: 'google-videos', label: 'Google Videos', url: 'https://www.google.com/search?tbm=vid&q=%s' },
+            { value: 'bing', label: 'Bing', url: 'https://www.bing.com/search?q=%s' },
+            { value: 'duckduckgo', label: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=%s' },
+            { value: 'yahoo', label: 'Yahoo', url: 'https://search.yahoo.com/search?p=%s' },
+            { value: 'yandex', label: 'Yandex', url: 'https://yandex.com/search/?text=%s' }
+        ];
+
+        // --- Init
+        function init() {
+            startPlaceholderRotation();
+            syncSubmitAccent();
+            updateHistoryDisplay();
+            loadCustomEngines();
+            updateSearchCount();
+            // daily reset
+            const today = new Date().toDateString();
+            const last = localStorage.getItem(lastResetDateKey);
+            if (last !== today) { searchCount = 0; localStorage.setItem('searchCount', '0'); localStorage.setItem(lastResetDateKey, today); updateSearchCount(); }
+        }
+
+        // Placeholder rotation
+        function startPlaceholderRotation() {
+            placeholderRotator.textContent = `Try: "${placeholders[phIndex]}"`;
+            setInterval(() => {
+                phIndex = (phIndex + 1) % placeholders.length;
+                placeholderRotator.style.opacity = 0; setTimeout(() => { placeholderRotator.textContent = `Try: \"${placeholders[phIndex]}\"`; placeholderRotator.style.opacity = 1; }, 220);
+            }, 4200);
+        }
+
+        // Clear button show/hide and behavior
+        input.addEventListener('input', () => {
+            clearInputBtn.style.display = input.value ? 'inline-flex' : 'none';
+            fetchSuggestionsDebounced(input.value);
+        });
+        clearInputBtn.addEventListener('click', () => { input.value = ''; input.focus(); clearSuggestions(); clearInputBtn.style.display = 'none'; });
+
+        // Keyboard prefixes (universal search)
+        // img: cats -> force google-images, vid: -> google-videos, ddg: -> duckduckgo
+        function parsePrefix(q) {
+            const trimmed = q.trim();
+            const lower = trimmed.toLowerCase();
+            if (lower.startsWith('img:')) return { engine: 'google-images', query: trimmed.slice(4).trim() };
+            if (lower.startsWith('vid:')) return { engine: 'google-videos', query: trimmed.slice(4).trim() };
+            if (lower.startsWith('ddg:')) return { engine: 'duckduckgo', query: trimmed.slice(4).trim() };
+            if (lower.startsWith('bing:')) return { engine: 'bing', query: trimmed.slice(5).trim() };
+            return null;
+        }
+
+        // Submit behavior
+        submitBtn.addEventListener('click', () => performSearch());
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // avoid form submit
+                if (suggestionsEl.classList.contains('show') && suggestions.length > 0) { // choose top
+                    navigateToSuggestion(0);
+                } else { performSearch(); }
+            }
+            if (e.key === 'ArrowDown') { e.preventDefault(); focusSuggestion(0); }
+        });
+
+        function performSearch() {
+            const raw = input.value.trim(); if (!raw) return;
+            const prefix = parsePrefix(raw);
+            let engine = engineSelect.value;
+            let query = raw;
+            if (prefix) { engine = prefix.engine; query = prefix.query; }
+            const engineDef = findEngine(engine);
+            const url = engineDef.url.replace('%s', encodeURIComponent(query));
+            // add to history
+            addToHistory(query, engine);
+            // open
+            window.open(url, '_blank', 'noopener');
+            // update count
+            searchCount++; localStorage.setItem('searchCount', String(searchCount)); updateSearchCount();
+        }
+
+        // --- Suggestions: try engine-specific endpoints, fallback to DuckDuckGo
+        async function fetchSuggestions(engine, q) {
+            if (!q) return [];
+            const enc = encodeURIComponent(q);
+            try {
+                if (engine.startsWith('google')) {
+                    // Google's suggest endpoint (client=firefox) often returns JSON and allows CORS
+                    const res = await fetch(`https://suggestqueries.google.com/complete/search?client=firefox&q=${enc}`);
+                    if (res.ok) { const data = await res.json(); return (data[1] || []).map(s => ({ text: s, type: 'Google' })); }
+                }
+                if (engine === 'bing') {
+                    const res = await fetch(`https://api.bing.com/osjson.aspx?query=${enc}`);
+                    if (res.ok) { const data = await res.json(); return (data[1] || []).map(s => ({ text: s, type: 'Bing' })); }
+                }
+                if (engine === 'duckduckgo') {
+                    const res = await fetch(`https://duckduckgo.com/ac/?q=${enc}`);
+                    if (res.ok) { const data = await res.json(); return (data || []).slice(0, 10).map(i => ({ text: i.phrase || i.replace || i, type: 'DuckDuckGo' })); }
+                }
+                // yahoo/yandex best-effort using google fallback
+                if (engine === 'yahoo' || engine === 'yandex') {
+                    const res = await fetch(`https://suggestqueries.google.com/complete/search?client=firefox&q=${enc}`);
+                    if (res.ok) { const data = await res.json(); return (data[1] || []).map(s => ({ text: s, type: 'Web' })); }
+                }
+            } catch (err) {
+                // console.warn('suggest fetch failed',err);
+            }
+            // fallback to DuckDuckGo (reliable)
+            try {
+                const res = await fetch(`https://duckduckgo.com/ac/?q=${enc}`);
+                if (res.ok) { const data = await res.json(); return (data || []).slice(0, 10).map(i => ({ text: i.phrase || i.replace || i, type: 'DuckDuckGo' })); }
+            } catch (e) { /* swallow */ }
+            return [];
+        }
+
+        // Debounced fetch
+        function fetchSuggestionsDebounced(q) {
+            clearTimeout(suggestionTimer);
+            suggestionTimer = setTimeout(async () => {
+                const prefix = parsePrefix(q || '');
+                const engine = prefix ? prefix.engine : engineSelect.value;
+                const query = prefix ? prefix.query : q;
+                const list = await fetchSuggestions(engine, query);
+                suggestions = list;
+                renderSuggestions();
+            }, 200);
+        }
+
+        function renderSuggestions() {
+            if (!suggestions || suggestions.length === 0) { clearSuggestions(); return; }
+            suggestionsEl.innerHTML = '';
+            suggestions.forEach((s, i) => {
+                const div = document.createElement('div');
+                div.className = 'suggestion';
+                div.innerHTML = `<div style="flex:1">${escapeHtml(s.text)}</div><div class='type'>${s.type}</div>`;
+                div.addEventListener('click', () => {
+                    input.value = s.text; input.focus(); performSearch();
+                });
+                suggestionsEl.appendChild(div);
+            });
+            suggestionsEl.classList.add('show');
+        }
+
+        function clearSuggestions() { suggestions = []; suggestionsEl.innerHTML = ''; suggestionsEl.classList.remove('show'); }
+
+        function focusSuggestion(idx) { const items = suggestionsEl.querySelectorAll('.suggestion'); if (items[idx]) items[idx].focus(); }
+        function navigateToSuggestion(idx) { if (!suggestions[idx]) return; input.value = suggestions[idx].text; performSearch(); }
+
+        // --- Engine manager
+        function loadCustomEngines() {
+            // merge defaults + custom
+            const merged = [...defaultEngines];
+            customEngines.forEach((c, idx) => merged.push({ value: `custom-${idx}`, label: c.label, url: c.url }));
+            // re-populate select
+            engineSelect.innerHTML = merged.map(e => `<option value="${escapeHtml(e.value)}">${escapeHtml(e.label)}</option>`).join('');
+            // store the merged list for lookup
+            window._engineList = merged;
+            renderEngineList();
+        }
+        function renderEngineList() {
+            engineList.innerHTML = '';
+            customEngines.forEach((c, i) => {
+                const row = document.createElement('div');
+                row.style.display = 'flex'; row.style.gap = '8px'; row.style.alignItems = 'center'; row.style.marginBottom = '8px';
+                row.innerHTML = `<div style='flex:1'>${escapeHtml(c.label)}<div style='font-size:12px;opacity:0.6'>${escapeHtml(c.url)}</div></div>`;
+                const del = document.createElement('button'); del.textContent = 'Remove'; del.className = 'prefs-btn'; del.addEventListener('click', () => { customEngines.splice(i, 1); localStorage.setItem('customEngines', JSON.stringify(customEngines)); loadCustomEngines(); });
+                row.appendChild(del);
+                engineList.appendChild(row);
+            });
+        }
+        addEngineBtn.addEventListener('click', () => {
+            const label = newEngineName.value.trim(); const url = newEngineUrl.value.trim();
+            if (!label || !url) return alert('Provide a label and a url with %s placeholder');
+            customEngines.push({ label, url }); localStorage.setItem('customEngines', JSON.stringify(customEngines)); newEngineName.value = ''; newEngineUrl.value = ''; loadCustomEngines();
+        });
+        manageEnginesBtn.addEventListener('click', () => { engineModal.style.display = 'flex'; });
+        closeEngineModal.addEventListener('click', () => { engineModal.style.display = 'none'; });
+
+        function findEngine(value) {
+            const list = window._engineList || defaultEngines;
+            return list.find(e => e.value === value) || list[0];
+        }
+
+        // --- voice search (graceful degrade)
+        let recognition;
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SR();
+            recognition.interimResults = true; recognition.lang = 'en-US';
+            voiceBtn.style.display = 'inline-flex';
+            voiceBtn.addEventListener('click', () => {
+                if (voiceBtn.dataset.listening === '1') { recognition.stop(); return; }
+                recognition.start(); voiceBtn.dataset.listening = '1'; voiceBtn.innerHTML = "<i class='bx bx-microphone-off'></i>";
+            });
+            recognition.addEventListener('result', (e) => {
+                const t = Array.from(e.results).map(r => r[0].transcript).join(''); input.value = t; fetchSuggestionsDebounced(t);
+            });
+            recognition.addEventListener('end', () => { voiceBtn.dataset.listening = '0'; voiceBtn.innerHTML = "<i class='bx bx-microphone'></i>"; });
+        } else { voiceBtn.style.display = 'none'; }
+
+        // --- small helpers
+        function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": "&#39;" })[c]); }
+
+        // history
+        function addToHistory(q, engine) { searchHistory = searchHistory.filter(i => !(i.query === q && i.engine === engine)); searchHistory.unshift({ query: q, engine, timestamp: Date.now() }); searchHistory = searchHistory.slice(0, 100); localStorage.setItem('searchHistory', JSON.stringify(searchHistory)); updateHistoryDisplay(); }
+        function updateHistoryDisplay() { // noop for now, used by export
+            // could show a small list later
+        }
+
+        // Export history
+        exportHistoryBtn.addEventListener('click', () => {
+            const blob = new Blob([JSON.stringify(searchHistory, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'search-history.json'; a.click(); URL.revokeObjectURL(url);
+        });
+
+        // accent sync based on engine
+        function syncSubmitAccent() {
+            const map = {
+                'google-web': '#4285f4', 'google-images': '#4285f4', 'google-videos': '#4285f4', 'bing': '#008373', 'duckduckgo': '#de5833', 'yahoo': '#4200ff', 'yandex': '#ff0000'
+            };
+            engineSelect.addEventListener('change', () => {
+                const val = engineSelect.value; const c = map[val] || '#6b6bff';
+                document.documentElement.style.setProperty('--accent', c);
+            });
+            // initialize
+            document.documentElement.style.setProperty('--accent', map[engineSelect.value] || '#4285f4');
+        }
+
+        function updateSearchCount() { searchCountEl.textContent = String(searchCount || 0); }
+
+        // click outside to hide
+        document.addEventListener('click', (e) => { if (!$('#searchCard').contains(e.target)) { clearSuggestions(); } });
+
+        // init
+        init();
+
+    </script>
+</body>
+
+</html>
