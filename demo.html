@@ -1,538 +1,1041 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="en">
 
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Multi‑Search — Enhanced</title>
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Search Engine</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <style>
-        :root {
-            --bg: #f7f8fb;
-            --fg: #222;
-            --card: rgba(255, 255, 255, 0.75);
-            --accent: #4285f4;
-            /* default Google blue */
-            --glass-border: rgba(0, 0, 0, 0.06);
+        body {
+            box-sizing: border-box;
         }
 
+
         * {
-            box-sizing: border-box
+            margin: 0;
+            padding: 0;
+            font-family: "Inter Tight", "Inter", "Segoe UI Variable Display", "Segoe UI", sans-serif;
+            font-weight: 500;
+            box-sizing: border-box;
+            transition: all 0.5s cubic-bezier(0.57, -0.01, 0.21, 0.89);
+            text-decoration: none;
+            outline: none;
+            border-radius: 1rem;
+            color: #222;
         }
 
         html,
         body {
             height: 100%;
             width: 100%;
-            margin: 0;
-            font-family: Inter, Segoe UI, system-ui, Arial, Helvetica, sans-serif;
-            background: radial-gradient(circle at 10% 10%, #fbfcfe, #eef0f5);
-            color: var(--fg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at top left, #f9f9fb, #e6e8ec);
+            overflow-x: hidden;
+        }
+
+        .s-mobile {
+            display: none;
+        }
+
+        .search-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 42rem;
+        }
+
+        .search-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+            border-radius: 1.05rem;
+            backdrop-filter: blur(1.8rem) saturate(180%);
+            background: rgba(255, 255, 255, 0.6);
+            border: 0.1rem solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .search-box::before {
+            content: "";
+            position: absolute;
+            inset: -0.2rem;
+            border-radius: 2rem;
+            background: linear-gradient(90deg, #ff8a00, #ff0077, #7b00ff, #00e1ff, #ff8a00);
+            background-size: 400%;
+            filter: blur(1rem) brightness(1.4);
+            opacity: 0;
+            z-index: 0;
+            transition: opacity 0.4s ease;
+            animation: flow 8s linear infinite paused;
+        }
+
+        .search-box::after {
+            content: "";
+            position: absolute;
+            inset: 0.15rem;
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: inset 0 0 0.05rem rgba(0, 0, 0, 0.1);
+            z-index: 1;
+        }
+
+        .search-box .glint {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #ff8a00, #ff0077, #7b00ff, #00e1ff, #ff8a00);
+            background-size: 400%;
+            filter: blur(1.2rem) opacity(0.5);
+            mix-blend-mode: screen;
+            z-index: 2;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            animation: flow 8s linear infinite paused;
+        }
+
+        .search-box .bottom-glow {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 35%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #ff8a00, #ff0077, #7b00ff, #00e1ff, #ff8a00);
+            background-size: 400%;
+            filter: blur(1.4rem) opacity(0.35);
+            mix-blend-mode: screen;
+            z-index: 2;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            animation: flow 8s linear infinite paused;
+        }
+
+        .search-box:focus-within::before,
+        .search-box:active::before {
+            opacity: 1;
+            animation-play-state: running;
+        }
+
+        .search-box:focus-within .glint,
+        .search-box:focus-within .bottom-glow {
+            opacity: 1;
+            animation-play-state: running;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 1.1rem 1.3rem;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: #222;
+            font-size: 1.05rem;
+            z-index: 3;
+        }
+
+        .search-engine {
+            padding: 1.1rem;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: #222;
+            font-size: 1rem;
+            z-index: 3;
+            border-left: 0.1rem solid rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+        }
+
+        .shortcut {
+            display: flex;
+            gap: 0.3rem;
+            margin-right: 1rem;
+            z-index: 3;
+        }
+
+        .shortcut .key {
+            padding: 0.35rem 0.6rem;
+            border-radius: 0.5rem;
+            background: rgba(0, 0, 0, 0.08);
+            color: #333;
+            font-size: 0.8rem;
+            font-weight: 500;
+            box-shadow: inset 0 0 0.4rem rgba(0, 0, 0, 0.05);
+        }
+
+        @keyframes flow {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .submit-btn {
+            padding: 1.1rem 1.3rem;
+            background: #4285f4;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            z-index: 3;
+            transition: all 0.3s ease;
+            border-left: 0.1rem solid rgba(0, 0, 0, 0.08);
+        }
+
+        .submit-btn:hover {
+            background: #357ae8;
+        }
+
+        .submit-btn i {
+            color: white;
+        }
+
+        .clear-input {
+            position: absolute;
+            right: 5.8rem;
+            z-index: 4;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.06);
+            border: none;
+            padding: 0.35rem;
+            border-radius: 0.5rem;
+            display: none;
+            cursor: pointer;
+        }
+
+        .clear-input i {
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        .corner-logo {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 24px
+            z-index: 20;
+            opacity: 0.2;
+            transition: all 0.3s ease;
         }
 
-        .wrap {
-            max-width: 900px;
-            width: 100%
+        .corner-logo img {
+            height: 6rem;
+            width: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 0 0.3rem rgba(0, 0, 0, 0.15));
+            transition: transform 0.3s ease, filter 0.3s ease;
         }
 
-        .search-card {
-            position: relative;
-            background: var(--card);
-            backdrop-filter: blur(8px) saturate(140%);
-            border-radius: 18px;
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 10px 30px rgba(20, 20, 30, 0.06);
-            padding: 18px;
-            display: flex;
-            gap: 12px;
-            align-items: center
+        .corner-logo:hover {
+            opacity: 1;
+            transform: translateY(-0.2rem);
         }
 
-        /* input */
-        .search-input {
-            flex: 1;
-            border: none;
-            background: transparent;
-            padding: 14px 12px;
-            font-size: 16px;
-            outline: none
+        .corner-logo:hover img {
+            transform: scale(1.08);
+            filter: drop-shadow(0 0 0.4rem rgba(0, 0, 0, 0.25));
         }
 
-        .search-left {
-            display: flex;
-            align-items: center;
-            gap: 10px
-        }
-
-        .engine-select {
-            appearance: none;
-            border: none;
-            background: transparent;
-            padding: 8px 10px;
-            border-left: 1px solid var(--glass-border);
-            font-weight: 600;
-            border-radius: 10px
-        }
-
-        /* dynamic submit */
-        .submit-btn {
-            background: var(--accent);
-            color: #fff;
-            border: none;
-            padding: 10px 14px;
-            border-radius: 10px;
-            font-size: 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px
-        }
-
-        .submit-btn:active {
-            transform: translateY(1px)
-        }
-
-        /* clear button */
-        .clear-btn {
-            background: transparent;
-            border: none;
-            padding: 8px;
-            border-radius: 8px;
-            cursor: pointer;
-            display: none
-        }
-
-        /* placeholder rotation */
-        .placeholder-rotator {
-            margin-bottom: 10px;
-            opacity: 0.9;
-            font-size: 14px;
-            color: rgba(0, 0, 0, 0.6)
-        }
-
-        /* suggestions */
-        .suggestions {
+        .suggestions-dropdown {
             position: absolute;
-            left: 18px;
-            right: 18px;
-            top: 74px;
-            background: var(--card);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 6px;
-            box-shadow: 0 10px 30px rgba(20, 20, 30, 0.06);
-            max-height: 320px;
-            overflow: auto;
-            display: none;
-            z-index: 60
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(1.8rem) saturate(180%);
+            border: 0.1rem solid rgba(0, 0, 0, 0.08);
+            border-radius: 1rem;
+            margin-top: 0.5rem;
+            max-height: 20rem;
+            overflow-y: auto;
+            z-index: 10;
+            opacity: 0;
+            transform: translateY(-0.5rem);
+            transition: all 0.3s ease;
+            pointer-events: none;
         }
 
-        .suggestions.show {
-            display: block
+        .suggestions-dropdown.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
         }
 
-        .suggestion {
-            padding: 10px 12px;
-            border-radius: 8px;
+        .suggestion-item {
+            padding: 0.8rem 1.3rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
-            gap: 10px;
-            cursor: pointer
+            gap: 0.8rem;
         }
 
-        .suggestion:hover {
-            background: rgba(66, 133, 244, 0.06)
+        .suggestion-item:last-child {
+            border-bottom: none;
         }
 
-        .suggestion .type {
-            font-size: 12px;
-            opacity: 0.6
+        .suggestion-item:hover,
+        .suggestion-item.highlighted {
+            background: rgba(66, 133, 244, 0.1);
+            color: #4285f4;
         }
 
-        /* history & controls */
-        .controls {
+        .suggestion-icon {
+            font-size: 0.9rem;
+            opacity: 0.6;
+            min-width: 1.2rem;
+        }
+
+        .suggestion-text {
+            flex: 1;
+        }
+
+        .suggestion-type {
+            font-size: 0.75rem;
+            opacity: 0.5;
+            text-transform: uppercase;
+            letter-spacing: 0.05rem;
+        }
+
+        .history-panel {
+            position: fixed;
+            top: 0;
+            right: -25rem;
+            width: 25rem;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(1.8rem) saturate(180%);
+            border-left: 0.1rem solid rgba(0, 0, 0, 0.08);
+            padding: 2rem 1.5rem;
+            z-index: 50;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            pointer-events: none;
+            overflow-y: auto;
+        }
+
+        .history-panel.show {
+            right: 0;
+            pointer-events: all;
+        }
+
+        .history-header {
             display: flex;
-            gap: 8px;
+            justify-content: space-between;
             align-items: center;
-            margin-top: 12px
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 0.05rem solid rgba(0, 0, 0, 0.1);
         }
 
-        .prefs-btn {
-            background: transparent;
-            border: 1px solid var(--glass-border);
-            padding: 8px;
-            border-radius: 8px;
-            cursor: pointer
+        .history-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #333;
         }
 
-        /* small */
-        @media(max-width:600px) {
-            .search-card {
-                flex-direction: column;
-                align-items: stretch
-            }
+        .clear-history {
+            background: #ff4757;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-            .suggestions {
-                top: 120px
+        .clear-history:hover {
+            background: #e63946;
+            transform: scale(1.05);
+        }
+
+        .clear-history i {
+            color: white;
+        }
+
+        .history-item {
+            padding: 0.6rem 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .history-item:hover {
+            background: rgba(66, 133, 244, 0.1);
+        }
+
+        .history-query {
+            flex: 1;
+            font-size: 0.9rem;
+        }
+
+        .history-engine {
+            font-size: 0.75rem;
+            opacity: 0.6;
+            background: rgba(0, 0, 0, 0.05);
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.3rem;
+        }
+
+        .history-time {
+            font-size: 0.7rem;
+            opacity: 0.5;
+        }
+
+        .history-btn {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(1rem);
+            padding: 0.8rem 1.2rem;
+            border-radius: 0.8rem;
+            border: 0.05rem solid rgba(0, 0, 0, 0.1);
+            font-size: 0.9rem;
+            color: #666;
+            z-index: 15;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .history-btn:hover {
+            opacity: 1;
+            transform: translateY(-0.1rem);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .history-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(0.2rem);
+            z-index: 49;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .history-backdrop.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 0.15rem solid rgba(66, 133, 244, 0.3);
+            border-radius: 50%;
+            border-top-color: #4285f4;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 0.5rem;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
             }
         }
 
-        /* dark theme tweaks */
-        @media(prefers-color-scheme:dark) {
-            :root {
-                --card: rgba(24, 24, 26, 0.6);
-                --bg: #0f0f12;
-                --fg: #e8e8e8;
-                --glass-border: rgba(255, 255, 255, 0.06)
-            }
+        @media screen and (max-width: 768px) {
 
+            html,
             body {
-                background: radial-gradient(circle at 10% 10%, #0d0d0f, #070708)
+                padding: 1rem;
+                align-items: center;
+                justify-content: center;
+                min-height: 100%;
+            }
+
+            .search-wrapper {
+                width: 100%;
+                max-width: none;
+                margin-top: 2rem;
+            }
+
+            .search-box {
+                border-radius: 1.2rem;
+                box-shadow: 0 0.8rem 2rem rgba(0, 0, 0, 0.12);
+            }
+
+            .search-input {
+                padding: 1.2rem 1.5rem;
+                font-size: 1.1rem;
+            }
+
+            .search-engine {
+                padding: 1.2rem 1.5rem;
+                font-size: 1rem;
+                border-left: none;
+            }
+
+            .shortcut {
+                display: none;
+            }
+
+            .submit-btn {
+                padding: 1.2rem 1.5rem;
+                border-left: none;
+                font-size: 1.2rem;
+                border-radius: 0 0 1.2rem 1.2rem;
+            }
+
+            .history-btn {
+                position: fixed;
+                top: 1.5rem;
+                left: 1.5rem;
+                padding: 0.8rem 1.2rem;
+                font-size: 0.9rem;
+                border-radius: 1rem;
+                box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.1);
+            }
+
+            .corner-logo {
+                bottom: 1.5rem;
+                right: 1.5rem;
+            }
+
+            .corner-logo img {
+                height: 3.5rem;
+            }
+
+            .suggestions-dropdown {
+                margin-top: 0.8rem;
+                border-radius: 1.2rem;
+                box-shadow: 0 0.8rem 2rem rgba(0, 0, 0, 0.12);
+            }
+
+            .suggestion-item {
+                padding: 1rem 1.5rem;
+            }
+
+            .history-panel {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(255, 255, 255, 0.98);
+                backdrop-filter: blur(2rem) saturate(180%);
+                border: none;
+                border-radius: 0;
+                padding: 2rem 1.5rem;
+                z-index: 100;
+                overflow-y: auto;
+                transform: translateY(100%);
+                transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            }
+
+            .history-panel.show {
+                transform: translateY(0);
+                pointer-events: all;
+            }
+
+            .history-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 2rem;
+                padding-bottom: 1rem;
+                position: relative;
+                border-bottom: 0.1rem solid rgba(0, 0, 0, 0.1);
+            }
+
+            .history-title {
+                font-size: 1.4rem;
+                font-weight: 700;
+                color: #333;
+            }
+
+            .history-buttons {
+                display: flex;
+                gap: 0.5rem;
+            }
+
+            .close-history {
+                background: rgba(0, 0, 0, 0.05);
+                border: none;
+                font-size: 1rem;
+                color: #666;
+                cursor: pointer;
+                padding: 0.5rem;
+                border-radius: 0.5rem;
+                transition: all 0.2s ease;
+                width: 2rem;
+                height: 2rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .close-history:hover {
+                background: rgba(0, 0, 0, 0.1);
+                color: #333;
+                transform: scale(1.05);
+            }
+
+            .history-item {
+                padding: 1.2rem 1.5rem;
+                margin-bottom: 0.8rem;
+                border-radius: 1rem;
+                background: rgba(0, 0, 0, 0.03);
+                border: 0.1rem solid rgba(0, 0, 0, 0.05);
+                transition: all 0.2s ease;
+            }
+
+            .history-item:hover {
+                background: rgba(66, 133, 244, 0.08);
+                border-color: rgba(66, 133, 244, 0.2);
+                transform: translateY(-0.1rem);
+            }
+
+            .history-query {
+                font-size: 1.1rem;
+                font-weight: 600;
+                margin-bottom: 0.3rem;
+            }
+
+            .history-engine {
+                font-size: 0.9rem;
+                padding: 0.3rem 0.8rem;
+                border-radius: 0.5rem;
+            }
+
+            .history-time {
+                font-size: 0.8rem;
+            }
+
+            .history-backdrop {
+                display: none;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+
+            html,
+            body {
+                padding: 0.5rem;
+                padding-top: 3rem;
+            }
+
+            .search-input {
+                font-size: 1rem;
+                padding: 0.9rem;
+            }
+
+            .search-engine {
+                font-size: 0.9rem;
+                padding: 0.9rem;
+            }
+
+            .submit-btn {
+                padding: 0.9rem;
+                font-size: 0.9rem;
+            }
+
+            .history-btn {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.75rem;
+            }
+
+            .corner-logo img {
+                height: 2.5rem;
+            }
+        }
+
+        @media (prefers-color-scheme: dark) {
+
+            html,
+            body {
+                background: radial-gradient(circle at top left, #1a1a1a, #0f0f0f);
+            }
+
+            * {
+                color: #e0e0e0;
+            }
+
+            .search-box {
+                background: rgba(30, 30, 30, 0.8);
+                border: 0.1rem solid rgba(255, 255, 255, 0.1);
+            }
+
+            .search-box::after {
+                background: rgba(30, 30, 30, 0.9);
+            }
+
+            .suggestions-dropdown,
+            .history-panel {
+                background: rgba(30, 30, 30, 0.95);
+                border: 0.1rem solid rgba(255, 255, 255, 0.1);
+            }
+
+            .history-btn {
+                background: rgba(30, 30, 30, 0.8);
+                border: 0.05rem solid rgba(255, 255, 255, 0.1);
+                color: #ccc;
+            }
+
+            .history-title {
+                color: #e0e0e0;
+            }
+
+            .clear-history {
+                background: #ff4757;
+            }
+
+            .clear-history:hover {
+                background: #e63946;
+            }
+
+            .close-history {
+                background: rgba(255, 255, 255, 0.1);
+                color: #ccc;
+            }
+
+            .close-history:hover {
+                background: rgba(255, 255, 255, 0.2);
+                color: #e0e0e0;
             }
         }
     </style>
+
+
 </head>
 
 <body>
-    <div class="wrap">
-        <div class="placeholder-rotator" id="placeholderRotator">Try: "how to deploy a react app"</div>
+    <button class="history-btn" type="button" aria-label="Toggle search history">
+        <i class='bx bx-history'></i>
+        <span id="searchCount">0</span>
+    </button>
 
-        <div class="search-card" id="searchCard">
-            <div class="search-left">
-                <button class="clear-btn" id="voiceBtn" title="Voice search" aria-label="Voice search"><i
-                        class='bx bx-microphone'></i></button>
-            </div>
 
-            <input class="search-input" id="searchInput" placeholder="Search the web..." autocomplete="off"
-                aria-label="Search input" />
+    <div class="history-backdrop" id="historyBackdrop" onclick="hideHistory()"></div>
 
-            <select class="engine-select" id="engineSelect" aria-label="Search engine">
-                <option value="google-web">Google — Classic</option>
+    <main class="search-wrapper">
+        <div class="search-box" id="searchBox">
+            <input type="text" class="search-input" id="searchInput" placeholder="Search the web..." required
+                autocomplete="off">
+            <select class="search-engine" id="engineSelect">
+                <option value="google-web">Google (No AI Bullshit)</option>
+                <option value="google-web-classic">Google</option>
                 <option value="google-images">Google Images</option>
                 <option value="google-videos">Google Videos</option>
                 <option value="bing">Bing</option>
-                <option value="duckduckgo">DuckDuckGo</option>
                 <option value="yahoo">Yahoo</option>
+                <option value="duckduckgo">DuckDuckGo</option>
                 <option value="yandex">Yandex</option>
             </select>
-
-            <button class="submit-btn" id="submitBtn" aria-label="Search"><i class='bx bx-search'
-                    id="submitIcon"></i><span id="submitLabel">Search</span></button>
-            <button class="clear-btn" id="clearInput" title="Clear" aria-label="Clear input"><i
-                    class='bx bx-x'></i></button>
-
-            <div class="suggestions" id="suggestions" role="listbox" aria-label="Suggestions"></div>
+            <div class="shortcut">
+                <span class="key">Ctrl</span>
+                <span class="key">K</span>
+            </div>
+            <button class="submit-btn" type="button" id="submitBtn">
+                <i class='bx bx-search' id="submitIcon"></i>
+            </button>
+            <button class="clear-input" id="clearInputBtn" aria-label="Clear input">
+                <i class='bx bx-x'></i>
+            </button>
+            <span class="glint"></span>
+            <span class="bottom-glow"></span>
         </div>
 
-        <div class="controls">
-            <button class="prefs-btn" id="manageEngines">Manage engines</button>
-            <button class="prefs-btn" id="exportHistory">Export history</button>
-            <div style="margin-left:auto;opacity:0.8;font-size:13px">Searches today: <span id="searchCount">0</span>
-            </div>
-        </div>
-    </div>
+        <div class="suggestions-dropdown" id="suggestionsDropdown"></div>
 
-    <!-- engine manager modal (simple) -->
-    <div id="engineModal"
-        style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;z-index:80">
-        <div
-            style="background:var(--card);padding:18px;border-radius:12px;width:90%;max-width:560px;border:1px solid var(--glass-border)">
-            <h3 style="margin:0 0 12px">Custom Engines</h3>
-            <div id="engineList"></div>
-            <div style="display:flex;gap:8px;margin-top:12px">
-                <input id="newEngineName" placeholder="Label e.g. Google (EU)"
-                    style="flex:1;padding:8px;border:1px solid var(--glass-border);border-radius:8px" />
-                <input id="newEngineUrl" placeholder="Search URL (use %s for query)"
-                    style="flex:1;padding:8px;border:1px solid var(--glass-border);border-radius:8px" />
+        <div class="history-panel" id="historyPanel">
+            <div class="history-header">
+                <span class="history-title">Recent Searches</span>
+                <div class="history-buttons">
+                    <button class="close-history" onclick="hideHistory()">
+                        <i class='bx bx-x'></i>
+                    </button>
+                    <button class="clear-history" onclick="clearSearchHistory()" aria-label="Clear search history">
+                        <i class='bx bx-trash'></i>
+                    </button>
+                </div>
             </div>
-            <div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-end">
-                <button id="addEngineBtn" class="prefs-btn">Add</button>
-                <button id="closeEngineModal" class="prefs-btn">Close</button>
-            </div>
+            <div id="historyList"></div>
         </div>
-    </div>
+    </main>
+
+    <a href="https://thekzbn.name.ng" class="corner-logo" target="_blank" rel="noopener noreferrer">
+        <img src="https://thekzbn.name.ng/assets/img/logo.png" alt="@thekzbn Logo"
+            onerror="this.src=''; this.alt='Logo failed to load'; this.style.display='none';">
+    </a>
 
     <script>
-        // --- Utilities
-        const $ = sel => document.querySelector(sel);
-        const qs = sel => Array.from(document.querySelectorAll(sel));
-
-        // Elements
-        const input = $('#searchInput');
-        const engineSelect = $('#engineSelect');
-        const submitBtn = $('#submitBtn');
-        const submitIcon = $('#submitIcon');
-        const submitLabel = $('#submitLabel');
-        const suggestionsEl = $('#suggestions');
-        const placeholderRotator = $('#placeholderRotator');
-        const clearInputBtn = $('#clearInput');
-        const voiceBtn = $('#voiceBtn');
-        const manageEnginesBtn = $('#manageEngines');
-        const engineModal = $('#engineModal');
-        const engineList = $('#engineList');
-        const addEngineBtn = $('#addEngineBtn');
-        const closeEngineModal = $('#closeEngineModal');
-        const newEngineName = $('#newEngineName');
-        const newEngineUrl = $('#newEngineUrl');
-        const exportHistoryBtn = $('#exportHistory');
-        const searchCountEl = $('#searchCount');
-
-        // State
-        let placeholders = [
-            'Search the web...',
-            'how to deploy a react app',
-            'compare iphone 15 vs pixel 9',
-            'recipes: pasta carbonara',
-            'weather Lagos',
-        ];
-        let phIndex = 0;
-        let suggestionTimer = 0;
+        const input = document.getElementById("searchInput");
+        const searchBox = document.getElementById("searchBox");
+        const engineSelect = document.getElementById("engineSelect");
+        const submitBtn = document.getElementById("submitBtn");
+        const submitIcon = document.getElementById("submitIcon");
+        const clearInputBtn = document.getElementById("clearInputBtn");
+        const suggestionsDropdown = document.getElementById("suggestionsDropdown");
+        const historyPanel = document.getElementById("historyPanel");
+        const historyList = document.getElementById("historyList");
+        const searchCountEl = document.getElementById("searchCount");
+        const historyBtn = document.querySelector(".history-btn");
+        const historyBackdrop = document.getElementById("historyBackdrop");
+        const shortcutKeys = document.querySelectorAll(".shortcut .key");
+        const isMac = navigator.platform.toUpperCase().includes("MAC");
+        shortcutKeys[0].textContent = isMac ? "⌘" : "Ctrl";
+        let currentSuggestionIndex = -1;
         let suggestions = [];
-        let searchHistory = JSON.parse(localStorage.getItem('searchHistory') || '[]');
-        let searchCount = parseInt(localStorage.getItem('searchCount') || '0');
-        const lastResetDateKey = 'lastResetDate';
-
-        // Custom engines stored in localStorage
-        let customEngines = JSON.parse(localStorage.getItem('customEngines') || '[]');
-        const defaultEngines = [
-            { value: 'google-web', label: 'Google — Classic', url: 'https://www.google.com/search?q=%s' },
-            { value: 'google-images', label: 'Google Images', url: 'https://www.google.com/search?tbm=isch&q=%s' },
-            { value: 'google-videos', label: 'Google Videos', url: 'https://www.google.com/search?tbm=vid&q=%s' },
-            { value: 'bing', label: 'Bing', url: 'https://www.bing.com/search?q=%s' },
-            { value: 'duckduckgo', label: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=%s' },
-            { value: 'yahoo', label: 'Yahoo', url: 'https://search.yahoo.com/search?p=%s' },
-            { value: 'yandex', label: 'Yandex', url: 'https://yandex.com/search/?text=%s' }
-        ];
-
-        // --- Init
-        function init() {
-            startPlaceholderRotation();
-            syncSubmitAccent();
-            updateHistoryDisplay();
-            loadCustomEngines();
-            updateSearchCount();
-            // daily reset
-            const today = new Date().toDateString();
-            const last = localStorage.getItem(lastResetDateKey);
-            if (last !== today) { searchCount = 0; localStorage.setItem('searchCount', '0'); localStorage.setItem(lastResetDateKey, today); updateSearchCount(); }
+        let searchHistory = JSON.parse(localStorage.getItem("searchHistory") || "[]");
+        let searchCount = parseInt(localStorage.getItem("searchCount") || "0");
+        let suggestionTimeout;
+        const placeholders = ["Search with Google...", "Try 'how to build a PC'", "Compare iPhone 15 vs Pixel 9"];
+        let phIndex = 0;
+        function rotatePlaceholder() {
+            phIndex = (phIndex + 1) % placeholders.length;
+            input.placeholder = placeholders[phIndex];
         }
-
-        // Placeholder rotation
-        function startPlaceholderRotation() {
-            placeholderRotator.textContent = `Try: "${placeholders[phIndex]}"`;
-            setInterval(() => {
-                phIndex = (phIndex + 1) % placeholders.length;
-                placeholderRotator.style.opacity = 0; setTimeout(() => { placeholderRotator.textContent = `Try: \"${placeholders[phIndex]}\"`; placeholderRotator.style.opacity = 1; }, 220);
-            }, 4200);
+        setInterval(rotatePlaceholder, 3000);
+        input.placeholder = placeholders[0];
+        function updateSubmitStyle() {
+            const map = {
+                "google-web": { color: "#4285f4", icon: "bx-search" },
+                "google-web-classic": { color: "#4285f4", icon: "bx-search" },
+                "google-images": { color: "#d81b60", icon: "bx-image" },
+                "google-videos": { color: "#e94235", icon: "bx-video" },
+                "bing": { color: "#008373", icon: "bx-bing" },
+                "yahoo": { color: "#5f20b3", icon: "bx-search" },
+                "duckduckgo": { color: "#de5833", icon: "bx-search" },
+                "yandex": { color: "#ff0000", icon: "bx-search-alt" }
+            };
+            const val = engineSelect.value;
+            const info = map[val] || { color: "#4285f4", icon: "bx-search" };
+            submitBtn.style.background = info.color;
+            const classes = submitIcon.className.split(" ").filter(Boolean);
+            submitIcon.className = classes.filter(c => c.startsWith("bx-")).length ? classes.filter(c => !c.startsWith("bx-")).join(" ") + " " + info.icon : "bx " + info.icon;
         }
-
-        // Clear button show/hide and behavior
-        input.addEventListener('input', () => {
-            clearInputBtn.style.display = input.value ? 'inline-flex' : 'none';
-            fetchSuggestionsDebounced(input.value);
+        engineSelect.addEventListener("change", updateSubmitStyle);
+        updateSubmitStyle();
+        input.addEventListener("input", e => {
+            clearInputBtn.style.display = e.target.value ? "inline-flex" : "none";
+            clearTimeout(suggestionTimeout);
+            suggestionTimeout = setTimeout(() => { fetchAndShowSuggestions(e.target.value.trim()); }, 150);
         });
-        clearInputBtn.addEventListener('click', () => { input.value = ''; input.focus(); clearSuggestions(); clearInputBtn.style.display = 'none'; });
-
-        // Keyboard prefixes (universal search)
-        // img: cats -> force google-images, vid: -> google-videos, ddg: -> duckduckgo
-        function parsePrefix(q) {
-            const trimmed = q.trim();
-            const lower = trimmed.toLowerCase();
-            if (lower.startsWith('img:')) return { engine: 'google-images', query: trimmed.slice(4).trim() };
-            if (lower.startsWith('vid:')) return { engine: 'google-videos', query: trimmed.slice(4).trim() };
-            if (lower.startsWith('ddg:')) return { engine: 'duckduckgo', query: trimmed.slice(4).trim() };
-            if (lower.startsWith('bing:')) return { engine: 'bing', query: trimmed.slice(5).trim() };
-            return null;
-        }
-
-        // Submit behavior
-        submitBtn.addEventListener('click', () => performSearch());
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault(); // avoid form submit
-                if (suggestionsEl.classList.contains('show') && suggestions.length > 0) { // choose top
-                    navigateToSuggestion(0);
-                } else { performSearch(); }
+        clearInputBtn.addEventListener("click", () => { input.value = ""; clearInputBtn.style.display = "none"; input.focus(); hideSuggestions(); });
+        document.addEventListener("keydown", e => {
+            if ((isMac && e.metaKey && e.key.toLowerCase() === "k") || (!isMac && e.ctrlKey && e.key.toLowerCase() === "k")) { e.preventDefault(); input.focus(); return; }
+            if ((isMac && e.metaKey && e.key.toLowerCase() === "h") || (!isMac && e.ctrlKey && e.key.toLowerCase() === "h")) { e.preventDefault(); toggleHistory(); return; }
+            if (suggestionsDropdown.classList.contains("show")) {
+                if (e.key === "ArrowDown") { e.preventDefault(); navigateSuggestions(1); }
+                else if (e.key === "ArrowUp") { e.preventDefault(); navigateSuggestions(-1); }
+                else if (e.key === "Enter" && currentSuggestionIndex >= 0) { e.preventDefault(); selectSuggestion(currentSuggestionIndex); }
+                else if (e.key === "Escape") { hideSuggestions(); }
             }
-            if (e.key === 'ArrowDown') { e.preventDefault(); focusSuggestion(0); }
         });
-
+        input.addEventListener("focus", () => { const q = input.value.trim(); if (q) fetchAndShowSuggestions(q); });
+        input.addEventListener("keypress", e => { if (e.key === "Enter") { e.preventDefault(); if (suggestionsDropdown.classList.contains("show") && currentSuggestionIndex >= 0) { selectSuggestion(currentSuggestionIndex); } else { performSearch(); } } });
+        document.addEventListener("click", e => { if (!searchBox.contains(e.target) && !suggestionsDropdown.contains(e.target) && !historyBtn.contains(e.target) && !historyPanel.contains(e.target)) { hideSuggestions(); hideHistory(); } });
+        submitBtn.addEventListener("click", e => { e.preventDefault(); performSearch(); });
+        historyBtn.addEventListener("click", () => { toggleHistory(); });
         function performSearch() {
-            const raw = input.value.trim(); if (!raw) return;
+            const raw = input.value.trim();
+            if (!raw) return;
             const prefix = parsePrefix(raw);
             let engine = engineSelect.value;
             let query = raw;
-            if (prefix) { engine = prefix.engine; query = prefix.query; }
-            const engineDef = findEngine(engine);
-            const url = engineDef.url.replace('%s', encodeURIComponent(query));
-            // add to history
+            if (prefix) { engine = prefix.engine; query = prefix.query; engineSelect.value = engine; updateSubmitStyle(); }
+            const url = getSearchUrl(engine, query);
             addToHistory(query, engine);
-            // open
-            window.open(url, '_blank', 'noopener');
-            // update count
-            searchCount++; localStorage.setItem('searchCount', String(searchCount)); updateSearchCount();
+            searchCount++;
+            localStorage.setItem("searchCount", String(searchCount));
+            updateSearchCount();
+            showLoading();
+            setTimeout(() => { const link = document.createElement('a'); link.href = url; link.target = '_blank'; link.rel = 'noopener noreferrer'; document.body.appendChild(link); link.click(); document.body.removeChild(link); hideLoading(); }, 150);
+            hideSuggestions();
         }
-
-        // --- Suggestions: try engine-specific endpoints, fallback to DuckDuckGo
-        async function fetchSuggestions(engine, q) {
+        function parsePrefix(q) {
+            const t = q.trim();
+            const l = t.toLowerCase();
+            if (l.startsWith('img:')) return { engine: 'google-images', query: t.slice(4).trim() };
+            if (l.startsWith('vid:')) return { engine: 'google-videos', query: t.slice(4).trim() };
+            if (l.startsWith('ddg:')) return { engine: 'duckduckgo', query: t.slice(4).trim() };
+            if (l.startsWith('bing:')) return { engine: 'bing', query: t.slice(5).trim() };
+            return null;
+        }
+        function getSearchUrl(engine, query) {
+            const encoded = encodeURIComponent(query);
+            switch (engine) {
+                case "google-web": return `https://www.google.com/search?q=${encoded}&udm=14&gl=us&hl=en`;
+                case "google-web-classic": return `https://www.google.com/search?q=${encoded}`;
+                case "google-images": return `https://www.google.com/search?tbm=isch&q=${encoded}`;
+                case "google-videos": return `https://www.google.com/search?tbm=vid&q=${encoded}`;
+                case "bing": return `https://www.bing.com/search?q=${encoded}`;
+                case "duckduckgo": return `https://duckduckgo.com/?q=${encoded}`;
+                case "yahoo": return `https://search.yahoo.com/search?p=${encoded}`;
+                case "yandex": return `https://yandex.com/search/?text=${encoded}`;
+                default: return `https://www.google.com/search?q=${encoded}`;
+            }
+        }
+        async function fetchEngineSuggestions(engine, q) {
             if (!q) return [];
             const enc = encodeURIComponent(q);
             try {
-                if (engine.startsWith('google')) {
-                    // Google's suggest endpoint (client=firefox) often returns JSON and allows CORS
+                if (engine === "google-web" || engine === "google-web-classic" || engine.startsWith("google")) {
                     const res = await fetch(`https://suggestqueries.google.com/complete/search?client=firefox&q=${enc}`);
-                    if (res.ok) { const data = await res.json(); return (data[1] || []).map(s => ({ text: s, type: 'Google' })); }
+                    if (res.ok) {
+                        const data = await res.json();
+                        return (data[1] || []).map(s => ({ text: s, type: 'Google' }));
+                    }
                 }
-                if (engine === 'bing') {
+                if (engine === "bing") {
                     const res = await fetch(`https://api.bing.com/osjson.aspx?query=${enc}`);
-                    if (res.ok) { const data = await res.json(); return (data[1] || []).map(s => ({ text: s, type: 'Bing' })); }
+                    if (res.ok) {
+                        const data = await res.json();
+                        return (data[1] || []).map(s => ({ text: s, type: 'Bing' }));
+                    }
                 }
-                if (engine === 'duckduckgo') {
+                if (engine === "duckduckgo") {
                     const res = await fetch(`https://duckduckgo.com/ac/?q=${enc}`);
-                    if (res.ok) { const data = await res.json(); return (data || []).slice(0, 10).map(i => ({ text: i.phrase || i.replace || i, type: 'DuckDuckGo' })); }
+                    if (res.ok) {
+                        const data = await res.json();
+                        return (data || []).slice(0, 10).map(i => ({ text: i.phrase || i, type: 'DuckDuckGo' }));
+                    }
                 }
-                // yahoo/yandex best-effort using google fallback
-                if (engine === 'yahoo' || engine === 'yandex') {
+                if (engine === "yahoo" || engine === "yandex") {
                     const res = await fetch(`https://suggestqueries.google.com/complete/search?client=firefox&q=${enc}`);
-                    if (res.ok) { const data = await res.json(); return (data[1] || []).map(s => ({ text: s, type: 'Web' })); }
+                    if (res.ok) {
+                        const data = await res.json();
+                        return (data[1] || []).map(s => ({ text: s, type: 'Web' }));
+                    }
                 }
-            } catch (err) {
-                // console.warn('suggest fetch failed',err);
-            }
-            // fallback to DuckDuckGo (reliable)
+            } catch (e) { }
             try {
                 const res = await fetch(`https://duckduckgo.com/ac/?q=${enc}`);
-                if (res.ok) { const data = await res.json(); return (data || []).slice(0, 10).map(i => ({ text: i.phrase || i.replace || i, type: 'DuckDuckGo' })); }
-            } catch (e) { /* swallow */ }
+                if (res.ok) {
+                    const data = await res.json();
+                    return (data || []).slice(0, 10).map(i => ({ text: i.phrase || i, type: 'DuckDuckGo' }));
+                }
+            } catch (e) { }
             return [];
         }
-
-        // Debounced fetch
-        function fetchSuggestionsDebounced(q) {
-            clearTimeout(suggestionTimer);
-            suggestionTimer = setTimeout(async () => {
-                const prefix = parsePrefix(q || '');
-                const engine = prefix ? prefix.engine : engineSelect.value;
-                const query = prefix ? prefix.query : q;
-                const list = await fetchSuggestions(engine, query);
-                suggestions = list;
-                renderSuggestions();
-            }, 200);
+        async function fetchAndShowSuggestions(q) {
+            if (!q) { hideSuggestions(); return; }
+            const prefix = parsePrefix(q);
+            const engine = prefix ? prefix.engine : engineSelect.value;
+            const query = prefix ? prefix.query : q;
+            const remote = await fetchEngineSuggestions(engine, query);
+            const historyMatches = searchHistory.filter(item => item.query.toLowerCase().includes(query.toLowerCase())).slice(0, 3).map(item => ({ text: item.query, type: 'history', action: () => { input.value = item.query; engineSelect.value = item.engine; performSearch(); } }));
+            const quick = getQuickSuggestions(query).map(s => ({ text: s.text, type: s.type, action: s.action }));
+            const merged = [];
+            merged.push(...historyMatches);
+            remote.slice(0, 6).forEach(r => merged.push({ text: r.text, type: r.type, action: () => { input.value = r.text; performSearch(); } }));
+            quick.forEach(k => merged.push(k));
+            suggestions = merged.slice(0, 8);
+            if (suggestions.length === 0) { hideSuggestions(); return; }
+            suggestionsDropdown.innerHTML = suggestions.map((s, i) => `<div class="suggestion-item" data-index="${i}"><span class="suggestion-icon"></span><span class="suggestion-text">${escapeHtml(s.text)}</span><span class="suggestion-type">${s.type}</span></div>`).join("");
+            suggestionsDropdown.classList.add("show");
+            currentSuggestionIndex = -1;
+            const items = suggestionsDropdown.querySelectorAll(".suggestion-item");
+            items.forEach((el, idx) => el.addEventListener("click", () => selectSuggestion(idx)));
         }
-
-        function renderSuggestions() {
-            if (!suggestions || suggestions.length === 0) { clearSuggestions(); return; }
-            suggestionsEl.innerHTML = '';
-            suggestions.forEach((s, i) => {
-                const div = document.createElement('div');
-                div.className = 'suggestion';
-                div.innerHTML = `<div style="flex:1">${escapeHtml(s.text)}</div><div class='type'>${s.type}</div>`;
-                div.addEventListener('click', () => {
-                    input.value = s.text; input.focus(); performSearch();
-                });
-                suggestionsEl.appendChild(div);
-            });
-            suggestionsEl.classList.add('show');
+        function getQuickSuggestions(query) {
+            const out = [];
+            const lower = query.toLowerCase();
+            if (lower.includes("how to")) out.push({ text: `${query} tutorial`, type: 'suggestion', action: () => { input.value = `${query} tutorial`; performSearch(); } });
+            if (lower.includes("what is")) out.push({ text: `${query} definition`, type: 'suggestion', action: () => { input.value = `${query} definition`; performSearch(); } });
+            const suffixes = [{ suffix: ' 2025', type: 'recent' }, { suffix: ' review', type: 'review' }, { suffix: ' vs', type: 'compare' }];
+            suffixes.forEach(s => { if (!lower.includes(s.suffix.trim())) out.push({ text: `${query}${s.suffix}`, type: s.type, action: () => { input.value = `${query}${s.suffix}`; performSearch(); } }); });
+            return out.slice(0, 3);
         }
-
-        function clearSuggestions() { suggestions = []; suggestionsEl.innerHTML = ''; suggestionsEl.classList.remove('show'); }
-
-        function focusSuggestion(idx) { const items = suggestionsEl.querySelectorAll('.suggestion'); if (items[idx]) items[idx].focus(); }
-        function navigateToSuggestion(idx) { if (!suggestions[idx]) return; input.value = suggestions[idx].text; performSearch(); }
-
-        // --- Engine manager
-        function loadCustomEngines() {
-            // merge defaults + custom
-            const merged = [...defaultEngines];
-            customEngines.forEach((c, idx) => merged.push({ value: `custom-${idx}`, label: c.label, url: c.url }));
-            // re-populate select
-            engineSelect.innerHTML = merged.map(e => `<option value="${escapeHtml(e.value)}">${escapeHtml(e.label)}</option>`).join('');
-            // store the merged list for lookup
-            window._engineList = merged;
-            renderEngineList();
+        function selectSuggestion(index) {
+            if (index >= 0 && index < suggestions.length) {
+                const s = suggestions[index];
+                if (s.action) s.action();
+                else { input.value = s.text; performSearch(); }
+                hideSuggestions();
+            }
         }
-        function renderEngineList() {
-            engineList.innerHTML = '';
-            customEngines.forEach((c, i) => {
-                const row = document.createElement('div');
-                row.style.display = 'flex'; row.style.gap = '8px'; row.style.alignItems = 'center'; row.style.marginBottom = '8px';
-                row.innerHTML = `<div style='flex:1'>${escapeHtml(c.label)}<div style='font-size:12px;opacity:0.6'>${escapeHtml(c.url)}</div></div>`;
-                const del = document.createElement('button'); del.textContent = 'Remove'; del.className = 'prefs-btn'; del.addEventListener('click', () => { customEngines.splice(i, 1); localStorage.setItem('customEngines', JSON.stringify(customEngines)); loadCustomEngines(); });
-                row.appendChild(del);
-                engineList.appendChild(row);
-            });
+        function navigateSuggestions(direction) {
+            const items = suggestionsDropdown.querySelectorAll(".suggestion-item");
+            if (items.length === 0) return;
+            if (currentSuggestionIndex >= 0) items[currentSuggestionIndex].classList.remove("highlighted");
+            currentSuggestionIndex += direction;
+            if (currentSuggestionIndex < 0) currentSuggestionIndex = items.length - 1;
+            else if (currentSuggestionIndex >= items.length) currentSuggestionIndex = 0;
+            items[currentSuggestionIndex].classList.add("highlighted");
+            items[currentSuggestionIndex].scrollIntoView({ block: "nearest" });
         }
-        addEngineBtn.addEventListener('click', () => {
-            const label = newEngineName.value.trim(); const url = newEngineUrl.value.trim();
-            if (!label || !url) return alert('Provide a label and a url with %s placeholder');
-            customEngines.push({ label, url }); localStorage.setItem('customEngines', JSON.stringify(customEngines)); newEngineName.value = ''; newEngineUrl.value = ''; loadCustomEngines();
-        });
-        manageEnginesBtn.addEventListener('click', () => { engineModal.style.display = 'flex'; });
-        closeEngineModal.addEventListener('click', () => { engineModal.style.display = 'none'; });
-
-        function findEngine(value) {
-            const list = window._engineList || defaultEngines;
-            return list.find(e => e.value === value) || list[0];
+        function hideSuggestions() { suggestionsDropdown.classList.remove("show"); currentSuggestionIndex = -1; suggestions = []; }
+        function addToHistory(query, engine) {
+            const item = { query, engine, timestamp: Date.now(), date: new Date().toLocaleDateString() };
+            searchHistory = searchHistory.filter(i => !(i.query === query && i.engine === engine));
+            searchHistory.unshift(item);
+            searchHistory = searchHistory.slice(0, 100);
+            localStorage.setItem("searchHistory", JSON.stringify(searchHistory));
+            renderHistoryList();
         }
-
-        // --- voice search (graceful degrade)
-        let recognition;
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognition = new SR();
-            recognition.interimResults = true; recognition.lang = 'en-US';
-            voiceBtn.style.display = 'inline-flex';
-            voiceBtn.addEventListener('click', () => {
-                if (voiceBtn.dataset.listening === '1') { recognition.stop(); return; }
-                recognition.start(); voiceBtn.dataset.listening = '1'; voiceBtn.innerHTML = "<i class='bx bx-microphone-off'></i>";
-            });
-            recognition.addEventListener('result', (e) => {
-                const t = Array.from(e.results).map(r => r[0].transcript).join(''); input.value = t; fetchSuggestionsDebounced(t);
-            });
-            recognition.addEventListener('end', () => { voiceBtn.dataset.listening = '0'; voiceBtn.innerHTML = "<i class='bx bx-microphone'></i>"; });
-        } else { voiceBtn.style.display = 'none'; }
-
-        // --- small helpers
-        function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": "&#39;" })[c]); }
-
-        // history
-        function addToHistory(q, engine) { searchHistory = searchHistory.filter(i => !(i.query === q && i.engine === engine)); searchHistory.unshift({ query: q, engine, timestamp: Date.now() }); searchHistory = searchHistory.slice(0, 100); localStorage.setItem('searchHistory', JSON.stringify(searchHistory)); updateHistoryDisplay(); }
-        function updateHistoryDisplay() { // noop for now, used by export
-            // could show a small list later
+        function renderHistoryList() {
+            if (searchHistory.length === 0) { historyList.innerHTML = '<div style="text-align: center; opacity: 0.5; padding: 2rem;">No search history yet</div>'; return; }
+            const grouped = {};
+            searchHistory.forEach(h => { grouped[h.date] = grouped[h.date] || []; grouped[h.date].push(h); });
+            const html = Object.keys(grouped).map(date => `<div style="margin-bottom:0.8rem"><div style="font-size:0.75rem;opacity:0.6;margin-bottom:0.4rem">${escapeHtml(date)}</div>${grouped[date].map(item => `<div class="history-item" data-query="${escapeHtml(item.query)}" data-engine="${escapeHtml(item.engine)}"><div class="history-query">${escapeHtml(item.query)}</div><div style="display:flex;gap:8px;align-items:center;margin-top:6px"><div class="history-engine">${escapeHtml(getEngineName(item.engine))}</div><div class="history-time">${getTimeAgo(item.timestamp)}</div></div></div>`).join("")}</div>`).join("");
+            historyList.innerHTML = html;
+            historyList.querySelectorAll('.history-item').forEach(el => el.addEventListener('click', () => { repeatSearch(el.dataset.query, el.dataset.engine); }));
         }
-
-        // Export history
-        exportHistoryBtn.addEventListener('click', () => {
-            const blob = new Blob([JSON.stringify(searchHistory, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'search-history.json'; a.click(); URL.revokeObjectURL(url);
-        });
-
-        // accent sync based on engine
-        function syncSubmitAccent() {
-            const map = {
-                'google-web': '#4285f4', 'google-images': '#4285f4', 'google-videos': '#4285f4', 'bing': '#008373', 'duckduckgo': '#de5833', 'yahoo': '#4200ff', 'yandex': '#ff0000'
-            };
-            engineSelect.addEventListener('change', () => {
-                const val = engineSelect.value; const c = map[val] || '#6b6bff';
-                document.documentElement.style.setProperty('--accent', c);
-            });
-            // initialize
-            document.documentElement.style.setProperty('--accent', map[engineSelect.value] || '#4285f4');
+        function repeatSearch(query, engine) { input.value = query; engineSelect.value = engine; updateSubmitStyle(); hideHistory(); performSearch(); }
+        function clearSearchHistory() { searchHistory = []; localStorage.removeItem("searchHistory"); renderHistoryList(); hideHistory(); }
+        function toggleHistory() { if (searchHistory.length === 0) { historyList.innerHTML = '<div style="text-align: center; opacity: 0.5; padding: 2rem;">No search history yet</div>'; return; } if (historyPanel.classList.contains("show")) hideHistory(); else showHistory(); }
+        function showHistory() { renderHistoryList(); historyPanel.classList.add("show"); if (window.innerWidth > 768) historyBackdrop.classList.add("show"); hideSuggestions(); const closeBtn = document.querySelector('.close-history'); if (window.innerWidth <= 768) closeBtn.style.display = 'flex'; else closeBtn.style.display = 'none'; if (window.innerWidth <= 768) document.body.style.overflow = 'hidden'; }
+        function hideHistory() { historyPanel.classList.remove("show"); historyBackdrop.classList.remove("show"); document.body.style.overflow = ''; }
+        function getEngineName(engine) {
+            const names = { "google-web": "Google (No BS)", "google-web-classic": "Google", "google-images": "Images", "google-videos": "Videos", "bing": "Bing", "duckduckgo": "DuckDuckGo", "yahoo": "Yahoo", "yandex": "Yandex" };
+            return names[engine] || "Google";
         }
-
-        function updateSearchCount() { searchCountEl.textContent = String(searchCount || 0); }
-
-        // click outside to hide
-        document.addEventListener('click', (e) => { if (!$('#searchCard').contains(e.target)) { clearSuggestions(); } });
-
-        // init
-        init();
-
+        function getTimeAgo(ts) { const now = Date.now(); const diff = now - ts; const m = Math.floor(diff / 60000); const h = Math.floor(diff / 3600000); const d = Math.floor(diff / 86400000); if (d > 0) return `${d}d ago`; if (h > 0) return `${h}h ago`; if (m > 0) return `${m}m ago`; return "Just now"; }
+        function updateSearchCount() { searchCountEl.textContent = searchCount; }
+        function showLoading() { submitBtn.innerHTML = '<span class="loading"></span>'; submitBtn.disabled = true; }
+        function hideLoading() { submitBtn.innerHTML = '<i class=\"bx bx-search\" id=\"submitIcon\"></i>'; submitBtn.disabled = false; updateSubmitStyle(); }
+        function escapeHtml(s) {
+            return String(s).replace(/[&<>\"']/g, c => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', \"'\":\"&#39;\"})[c]); }
+    const today = new Date().toDateString();
+                const lastResetDate = localStorage.getItem("lastResetDate");
+                if(lastResetDate !== today){ searchCount = 0; localStorage.setItem("searchCount", "0"); localStorage.setItem("lastResetDate", today); updateSearchCount(); }
+    renderHistoryList();
     </script>
+
+
 </body>
 
 </html>
