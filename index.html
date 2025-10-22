@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Search Engine</title>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: "Inter Tight", "Inter", "Segoe UI Variable Display", "Segoe UI", sans-serif;
+            font-weight: 500;
+            box-sizing: border-box;
+            transition: all 0.5s cubic-bezier(0.57, -0.01, 0.21, 0.89);
+            text-decoration: none;
+            outline: none;
+            border-radius: 1rem;
+            color: #222;
+        }
+        
+        html, body {
+            height: 100%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at top left, #f9f9fb, #e6e8ec);
+        }
+        
+        .search-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 42rem;
+        }
+        
+        .search-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+            border-radius: 1.05rem;
+            backdrop-filter: blur(1.8rem) saturate(180%);
+            background: rgba(255, 255, 255, 0.6);
+            border: 0.1rem solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+        
+        .search-box::before {
+            content: "";
+            position: absolute;
+            inset: -0.2rem;
+            border-radius: 2rem;
+            background: linear-gradient(90deg, #ff8a00, #ff0077, #7b00ff, #00e1ff, #ff8a00);
+            background-size: 400%;
+            filter: blur(1rem) brightness(1.4);
+            opacity: 0;
+            z-index: 0;
+            transition: opacity 0.4s ease;
+            animation: flow 8s linear infinite paused;
+        }
+        
+        .search-box::after {
+            content: "";
+            position: absolute;
+            inset: 0.15rem;
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: inset 0 0 0.05rem rgba(0, 0, 0, 0.1);
+            z-index: 1;
+        }
+        
+        .search-box .glint {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #ff8a00, #ff0077, #7b00ff, #00e1ff, #ff8a00);
+            background-size: 400%;
+            filter: blur(1.2rem) opacity(0.5);
+            mix-blend-mode: screen;
+            z-index: 2;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            animation: flow 8s linear infinite paused;
+        }
+        
+        .search-box .bottom-glow {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 35%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #ff8a00, #ff0077, #7b00ff, #00e1ff, #ff8a00);
+            background-size: 400%;
+            filter: blur(1.4rem) opacity(0.35);
+            mix-blend-mode: screen;
+            z-index: 2;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            animation: flow 8s linear infinite paused;
+        }
+        
+        .search-box:focus-within::before,
+        .search-box:active::before {
+            opacity: 1;
+            animation-play-state: running;
+        }
+        
+        .search-box:focus-within .glint,
+        .search-box:focus-within .bottom-glow {
+            opacity: 1;
+            animation-play-state: running;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 1.1rem 1.3rem;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: #222;
+            font-size: 1.05rem;
+            z-index: 3;
+        }
+        
+        .search-engine {
+            padding: 1.1rem;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: #222;
+            font-size: 1rem;
+            z-index: 3;
+            border-left: 0.1rem solid rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+        }
+        
+        .shortcut {
+            display: flex;
+            gap: 0.3rem;
+            margin-right: 1rem;
+            z-index: 3;
+        }
+        
+        .shortcut .key {
+            padding: 0.35rem 0.6rem;
+            border-radius: 0.5rem;
+            background: rgba(0, 0, 0, 0.08);
+            color: #333;
+            font-size: 0.8rem;
+            font-weight: 500;
+            box-shadow: inset 0 0 0.4rem rgba(0, 0, 0, 0.05);
+        }
+        
+        @keyframes flow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .submit-btn {
+            position: absolute;
+            top: 110%;
+            right: 0;
+            margin-top: 1rem;
+            padding: 0.8rem 1.5rem;
+            background: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 0.9rem;
+            cursor: pointer;
+            font-size: 1rem;
+            z-index: 3;
+            transition: all 0.3s ease;
+        }
+        
+        .submit-btn:hover {
+            background: #357ae8;
+            transform: translateY(-0.1rem);
+        }
+        
+        .corner-logo {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            opacity: 0.2;
+            transition: all 0.3s ease;
+        }
+        
+        .corner-logo img {
+            height: 6rem;
+            width: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 0 0.3rem rgba(0, 0, 0, 0.15));
+            transition: transform 0.3s ease, filter 0.3s ease;
+        }
+        
+        .corner-logo:hover {
+            opacity: 1;
+            transform: translateY(-0.2rem);
+        }
+        
+        .corner-logo:hover img {
+            transform: scale(1.08);
+            filter: drop-shadow(0 0 0.4rem rgba(0, 0, 0, 0.25));
+        }
+        
+        /* Suggestions Dropdown */
+        .suggestions-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(1.8rem) saturate(180%);
+            border: 0.1rem solid rgba(0, 0, 0, 0.08);
+            border-radius: 1rem;
+            margin-top: 0.5rem;
+            max-height: 20rem;
+            overflow-y: auto;
+            z-index: 10;
+            opacity: 0;
+            transform: translateY(-0.5rem);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .suggestions-dropdown.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+        
+        .suggestion-item {
+            padding: 0.8rem 1.3rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            border-bottom: 0.05rem solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+        
+        .suggestion-item:hover,
+        .suggestion-item.highlighted {
+            background: rgba(66, 133, 244, 0.1);
+            color: #4285f4;
+        }
+        
+        .suggestion-icon {
+            font-size: 0.9rem;
+            opacity: 0.6;
+            min-width: 1.2rem;
+        }
+        
+        .suggestion-text {
+            flex: 1;
+        }
+        
+        .suggestion-type {
+            font-size: 0.75rem;
+            opacity: 0.5;
+            text-transform: uppercase;
+            letter-spacing: 0.05rem;
+        }
+        
+        /* History Panel */
+        .history-panel {
+            position: absolute;
+            top: 110%;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(1.8rem) saturate(180%);
+            border: 0.1rem solid rgba(0, 0, 0, 0.08);
+            border-radius: 1rem;
+            margin-top: 1rem;
+            padding: 1rem;
+            z-index: 5;
+            opacity: 0;
+            transform: translateY(-0.5rem);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .history-panel.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+        
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 0.05rem solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .history-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .clear-history {
+            background: none;
+            border: none;
+            color: #ff4757;
+            cursor: pointer;
+            font-size: 0.8rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+        
+        .clear-history:hover {
+            background: rgba(255, 71, 87, 0.1);
+        }
+        
+        .history-item {
+            padding: 0.6rem 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.3rem;
+        }
+        
+        .history-item:hover {
+            background: rgba(66, 133, 244, 0.1);
+        }
+        
+        .history-query {
+            flex: 1;
+            font-size: 0.9rem;
+        }
+        
+        .history-engine {
+            font-size: 0.75rem;
+            opacity: 0.6;
+            background: rgba(0, 0, 0, 0.05);
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.3rem;
+        }
+        
+        .history-time {
+            font-size: 0.7rem;
+            opacity: 0.5;
+        }
+        
+        /* Search Stats */
+        .search-stats {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(1rem);
+            padding: 0.8rem 1.2rem;
+            border-radius: 0.8rem;
+            border: 0.05rem solid rgba(0, 0, 0, 0.1);
+            font-size: 0.8rem;
+            color: #666;
+            z-index: 15;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+        
+        .search-stats:hover {
+            opacity: 1;
+            transform: translateY(-0.1rem);
+        }
+        
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 0.15rem solid rgba(66, 133, 244, 0.3);
+            border-radius: 50%;
+            border-top-color: #4285f4;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 0.5rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Mobile Responsive */
+        @media screen and (max-width: 687px) {
+            .search-box {
+                margin: 3rem;
+                margin-top: 0;
+                margin-bottom: 0;
+            }
+            
+            .submit-btn {
+                right: 3rem;
+            }
+            
+            .search-stats {
+                position: relative;
+                top: auto;
+                left: auto;
+                margin: 1rem 3rem;
+                text-align: center;
+            }
+            
+            .corner-logo {
+                bottom: 1rem;
+                right: 1rem;
+            }
+            
+            .corner-logo img {
+                height: 4rem;
+            }
+        }
+        
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            html, body {
+                background: radial-gradient(circle at top left, #1a1a1a, #0f0f0f);
+            }
+            
+            * {
+                color: #e0e0e0;
+            }
+            
+            .search-box {
+                background: rgba(30, 30, 30, 0.8);
+                border: 0.1rem solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .search-box::after {
+                background: rgba(30, 30, 30, 0.9);
+            }
+            
+            .suggestions-dropdown,
+            .history-panel {
+                background: rgba(30, 30, 30, 0.95);
+                border: 0.1rem solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .search-stats {
+                background: rgba(30, 30, 30, 0.8);
+                border: 0.05rem solid rgba(255, 255, 255, 0.1);
+                color: #ccc;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="search-stats">
+        <span id="searchCount">0</span> searches today
+    </div>
+    
+    <main class="search-wrapper">
+        <div class="search-box">
+            <input type="text" class="search-input" placeholder="Search the web..." required autocomplete="off">
+            <select class="search-engine">
+                <option value="google-web">Google (No AI Bullshit)</option>
+                <option value="google-images">Google Images</option>
+                <option value="google-videos">Google Videos</option>
+                <option value="bing">Bing</option>
+                <option value="duckduckgo">DuckDuckGo</option>
+                <option value="yahoo">Yahoo</option>
+                <option value="yandex">Yandex</option>
+            </select>
+            <div class="shortcut">
+                <span class="key">Ctrl</span>
+                <span class="key">K</span>
+            </div>
+            <span class="glint"></span>
+            <span class="bottom-glow"></span>
+        </div>
+        
+        <div class="suggestions-dropdown" id="suggestionsDropdown"></div>
+        
+        <div class="history-panel" id="historyPanel">
+            <div class="history-header">
+                <span class="history-title">Recent Searches</span>
+                <button class="clear-history" onclick="clearSearchHistory()">Clear All</button>
+            </div>
+            <div id="historyList"></div>
+        </div>
+        
+        <button class="submit-btn">Search</button>
+    </main>
+    
+    <a href="https://thekzbn.name.ng" class="corner-logo" target="_blank" rel="noopener noreferrer">
+        <img src="https://thekzbn.name.ng/assets/img/logo.png" alt="@thekzbn Logo" onerror="this.src=''; this.alt='Logo failed to load'; this.style.display='none';">
+    </a>
+
+    <script>
+        // Enhanced Search Engine with Advanced Features
+        const input = document.querySelector(".search-input");
+        const searchBox = document.querySelector(".search-box");
+        const engineSelect = document.querySelector(".search-engine");
+        const submitBtn = document.querySelector(".submit-btn");
+        const shortcutKeys = document.querySelectorAll(".shortcut .key");
+        const suggestionsDropdown = document.getElementById("suggestionsDropdown");
+        const historyPanel = document.getElementById("historyPanel");
+        const historyList = document.getElementById("historyList");
+        const searchCountEl = document.getElementById("searchCount");
+        
+        // Platform detection
+        const isMac = navigator.platform.toUpperCase().includes("MAC");
+        shortcutKeys[0].textContent = isMac ? "⌘" : "Ctrl";
+        
+        // State management
+        let currentSuggestionIndex = -1;
+        let suggestions = [];
+        let searchHistory = JSON.parse(localStorage.getItem("searchHistory") || "[]");
+        let searchCount = parseInt(localStorage.getItem("searchCount") || "0");
+        let suggestionTimeout;
+        
+        // Initialize
+        updateSearchCount();
+        
+        // Keyboard shortcuts
+        document.addEventListener("keydown", (e) => {
+            // Focus search with Ctrl/Cmd + K
+            if ((isMac && e.metaKey && e.key.toLowerCase() === "k") || 
+                (!isMac && e.ctrlKey && e.key.toLowerCase() === "k")) {
+                e.preventDefault();
+                input.focus();
+                return;
+            }
+            
+            // Show history with Ctrl/Cmd + H
+            if ((isMac && e.metaKey && e.key.toLowerCase() === "h") || 
+                (!isMac && e.ctrlKey && e.key.toLowerCase() === "h")) {
+                e.preventDefault();
+                toggleHistory();
+                return;
+            }
+            
+            // Navigate suggestions with arrow keys
+            if (suggestionsDropdown.classList.contains("show")) {
+                if (e.key === "ArrowDown") {
+                    e.preventDefault();
+                    navigateSuggestions(1);
+                } else if (e.key === "ArrowUp") {
+                    e.preventDefault();
+                    navigateSuggestions(-1);
+                } else if (e.key === "Enter" && currentSuggestionIndex >= 0) {
+                    e.preventDefault();
+                    selectSuggestion(currentSuggestionIndex);
+                } else if (e.key === "Escape") {
+                    hideSuggestions();
+                }
+            }
+        });
+        
+        // Input events
+        input.addEventListener("input", (e) => {
+            const query = e.target.value.trim();
+            if (query.length > 0) {
+                clearTimeout(suggestionTimeout);
+                suggestionTimeout = setTimeout(() => {
+                    showSuggestions(query);
+                }, 150);
+            } else {
+                hideSuggestions();
+            }
+        });
+        
+        input.addEventListener("focus", () => {
+            const query = input.value.trim();
+            if (query.length > 0) {
+                showSuggestions(query);
+            }
+        });
+        
+        input.addEventListener("keypress", (e) => {
+            if (e.key === "Enter" && !suggestionsDropdown.classList.contains("show")) {
+                performSearch();
+            }
+        });
+        
+        // Click outside to close
+        document.addEventListener("click", (e) => {
+            if (!searchBox.contains(e.target) && !suggestionsDropdown.contains(e.target)) {
+                hideSuggestions();
+                hideHistory();
+            }
+        });
+        
+        // Submit button
+        submitBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            performSearch();
+        });
+        
+        // Search functionality
+        function performSearch() {
+            const query = input.value.trim();
+            if (!query) return;
+            
+            const engine = engineSelect.value;
+            const url = getSearchUrl(engine, query);
+            
+            // Add to history
+            addToHistory(query, engine);
+            
+            // Update search count
+            searchCount++;
+            localStorage.setItem("searchCount", searchCount.toString());
+            updateSearchCount();
+            
+            // Show loading state
+            showLoading();
+            
+            // Open search
+            setTimeout(() => {
+                window.open(url, '_blank', 'noopener,noreferrer');
+                hideLoading();
+            }, 300);
+            
+            hideSuggestions();
+        }
+        
+        function getSearchUrl(engine, query) {
+            const encodedQuery = encodeURIComponent(query);
+            
+            switch (engine) {
+                case "google-web":
+                    return `https://www.google.com/search?tbm=web&q=${encodedQuery}`;
+                case "google-images":
+                    return `https://www.google.com/search?tbm=isch&q=${encodedQuery}`;
+                case "google-videos":
+                    return `https://www.google.com/search?tbm=vid&q=${encodedQuery}`;
+                case "bing":
+                    return `https://www.bing.com/search?q=${encodedQuery}`;
+                case "duckduckgo":
+                    return `https://duckduckgo.com/?q=${encodedQuery}`;
+                case "yahoo":
+                    return `https://search.yahoo.com/search?p=${encodedQuery}`;
+                case "yandex":
+                    return `https://yandex.com/search/?text=${encodedQuery}`;
+                default:
+                    return `https://www.google.com/search?tbm=web&q=${encodedQuery}`;
+            }
+        }
+        
+        // Suggestions system
+        function showSuggestions(query) {
+            suggestions = generateSuggestions(query);
+            if (suggestions.length === 0) {
+                hideSuggestions();
+                return;
+            }
+            
+            suggestionsDropdown.innerHTML = suggestions.map((suggestion, index) => `
+                <div class="suggestion-item" data-index="${index}" onclick="selectSuggestion(${index})">
+                    <span class="suggestion-icon">${suggestion.icon}</span>
+                    <span class="suggestion-text">${suggestion.text}</span>
+                    <span class="suggestion-type">${suggestion.type}</span>
+                </div>
+            `).join("");
+            
+            suggestionsDropdown.classList.add("show");
+            currentSuggestionIndex = -1;
+        }
+        
+        function generateSuggestions(query) {
+            const suggestions = [];
+            
+            // History-based suggestions
+            const historySuggestions = searchHistory
+                .filter(item => item.query.toLowerCase().includes(query.toLowerCase()))
+                .slice(0, 3)
+                .map(item => ({
+                    text: item.query,
+                    type: "history",
+                    icon: "🕒",
+                    action: () => {
+                        input.value = item.query;
+                        engineSelect.value = item.engine;
+                        performSearch();
+                    }
+                }));
+            
+            suggestions.push(...historySuggestions);
+            
+            // Quick suggestions based on query patterns
+            const quickSuggestions = getQuickSuggestions(query);
+            suggestions.push(...quickSuggestions);
+            
+            return suggestions.slice(0, 6);
+        }
+        
+        function getQuickSuggestions(query) {
+            const suggestions = [];
+            const lowerQuery = query.toLowerCase();
+            
+            // Common search patterns
+            if (lowerQuery.includes("how to")) {
+                suggestions.push({
+                    text: `${query} tutorial`,
+                    type: "suggestion",
+                    icon: "📚",
+                    action: () => searchWithSuffix(" tutorial")
+                });
+            }
+            
+            if (lowerQuery.includes("what is")) {
+                suggestions.push({
+                    text: `${query} definition`,
+                    type: "suggestion",
+                    icon: "📖",
+                    action: () => searchWithSuffix(" definition")
+                });
+            }
+            
+            // Add common suffixes
+            const suffixes = [
+                { suffix: " 2024", icon: "📅", type: "recent" },
+                { suffix: " review", icon: "⭐", type: "review" },
+                { suffix: " vs", icon: "⚖️", type: "compare" }
+            ];
+            
+            suffixes.forEach(({ suffix, icon, type }) => {
+                if (!lowerQuery.includes(suffix.trim())) {
+                    suggestions.push({
+                        text: `${query}${suffix}`,
+                        type: type,
+                        icon: icon,
+                        action: () => searchWithSuffix(suffix)
+                    });
+                }
+            });
+            
+            return suggestions.slice(0, 3);
+        }
+        
+        function searchWithSuffix(suffix) {
+            input.value += suffix;
+            performSearch();
+        }
+        
+        function selectSuggestion(index) {
+            if (index >= 0 && index < suggestions.length) {
+                suggestions[index].action();
+                hideSuggestions();
+            }
+        }
+        
+        function navigateSuggestions(direction) {
+            const items = suggestionsDropdown.querySelectorAll(".suggestion-item");
+            
+            // Remove previous highlight
+            if (currentSuggestionIndex >= 0) {
+                items[currentSuggestionIndex].classList.remove("highlighted");
+            }
+            
+            // Update index
+            currentSuggestionIndex += direction;
+            
+            if (currentSuggestionIndex < 0) {
+                currentSuggestionIndex = items.length - 1;
+            } else if (currentSuggestionIndex >= items.length) {
+                currentSuggestionIndex = 0;
+            }
+            
+            // Add new highlight
+            items[currentSuggestionIndex].classList.add("highlighted");
+            items[currentSuggestionIndex].scrollIntoView({ block: "nearest" });
+        }
+        
+        function hideSuggestions() {
+            suggestionsDropdown.classList.remove("show");
+            currentSuggestionIndex = -1;
+        }
+        
+        // History management
+        function addToHistory(query, engine) {
+            const historyItem = {
+                query,
+                engine,
+                timestamp: Date.now(),
+                date: new Date().toLocaleDateString()
+            };
+            
+            // Remove duplicate
+            searchHistory = searchHistory.filter(item => 
+                !(item.query === query && item.engine === engine)
+            );
+            
+            // Add to beginning
+            searchHistory.unshift(historyItem);
+            
+            // Keep only last 50 searches
+            searchHistory = searchHistory.slice(0, 50);
+            
+            localStorage.setItem("searchHistory", JSON.stringify(searchHistory));
+            updateHistoryDisplay();
+        }
+        
+        function updateHistoryDisplay() {
+            if (searchHistory.length === 0) {
+                historyList.innerHTML = '<div style="text-align: center; opacity: 0.5; padding: 2rem;">No search history yet</div>';
+                return;
+            }
+            
+            historyList.innerHTML = searchHistory.slice(0, 10).map(item => `
+                <div class="history-item" onclick="repeatSearch('${item.query}', '${item.engine}')">
+                    <span class="history-query">${item.query}</span>
+                    <span class="history-engine">${getEngineName(item.engine)}</span>
+                    <span class="history-time">${getTimeAgo(item.timestamp)}</span>
+                </div>
+            `).join("");
+        }
+        
+        function repeatSearch(query, engine) {
+            input.value = query;
+            engineSelect.value = engine;
+            hideHistory();
+            performSearch();
+        }
+        
+        function clearSearchHistory() {
+            searchHistory = [];
+            localStorage.removeItem("searchHistory");
+            updateHistoryDisplay();
+        }
+        
+        function toggleHistory() {
+            if (historyPanel.classList.contains("show")) {
+                hideHistory();
+            } else {
+                showHistory();
+            }
+        }
+        
+        function showHistory() {
+            updateHistoryDisplay();
+            historyPanel.classList.add("show");
+            hideSuggestions();
+        }
+        
+        function hideHistory() {
+            historyPanel.classList.remove("show");
+        }
+        
+        // Utility functions
+        function getEngineName(engine) {
+            const names = {
+                "google-web": "Google",
+                "google-images": "Images",
+                "google-videos": "Videos",
+                "bing": "Bing",
+                "duckduckgo": "DuckDuckGo",
+                "yahoo": "Yahoo",
+                "yandex": "Yandex"
+            };
+            return names[engine] || "Google";
+        }
+        
+        function getTimeAgo(timestamp) {
+            const now = Date.now();
+            const diff = now - timestamp;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+            
+            if (days > 0) return `${days}d ago`;
+            if (hours > 0) return `${hours}h ago`;
+            if (minutes > 0) return `${minutes}m ago`;
+            return "Just now";
+        }
+        
+        function updateSearchCount() {
+            searchCountEl.textContent = searchCount;
+        }
+        
+        function showLoading() {
+            submitBtn.innerHTML = 'Searching<span class="loading"></span>';
+            submitBtn.disabled = true;
+        }
+        
+        function hideLoading() {
+            submitBtn.innerHTML = 'Search';
+            submitBtn.disabled = false;
+        }
+        
+        // Reset daily search count
+        const today = new Date().toDateString();
+        const lastResetDate = localStorage.getItem("lastResetDate");
+        
+        if (lastResetDate !== today) {
+            searchCount = 0;
+            localStorage.setItem("searchCount", "0");
+            localStorage.setItem("lastResetDate", today);
+            updateSearchCount();
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99278e0902de9491',t:'MTc2MTEyMTAxMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
