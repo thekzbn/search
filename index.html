@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Multi-Search Engine</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <style>
         body {
             box-sizing: border-box;
@@ -169,24 +170,19 @@
         }
         
         .submit-btn {
-            position: absolute;
-            top: 110%;
-            right: 0;
-            margin-top: 1rem;
-            padding: 0.8rem 1.5rem;
+            padding: 1.1rem 1.3rem;
             background: #4285f4;
             color: white;
             border: none;
-            border-radius: 0.9rem;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 1.2rem;
             z-index: 3;
             transition: all 0.3s ease;
+            border-left: 0.1rem solid rgba(0, 0, 0, 0.08);
         }
         
         .submit-btn:hover {
             background: #357ae8;
-            transform: translateY(-0.1rem);
         }
         
         .corner-logo {
@@ -370,8 +366,8 @@
             opacity: 0.5;
         }
         
-        /* Search Stats */
-        .search-stats {
+        /* History Button */
+        .history-btn {
             position: fixed;
             top: 2rem;
             left: 2rem;
@@ -380,16 +376,21 @@
             padding: 0.8rem 1.2rem;
             border-radius: 0.8rem;
             border: 0.05rem solid rgba(0, 0, 0, 0.1);
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             color: #666;
             z-index: 15;
             opacity: 0.7;
             transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         
-        .search-stats:hover {
+        .history-btn:hover {
             opacity: 1;
             transform: translateY(-0.1rem);
+            background: rgba(255, 255, 255, 0.95);
         }
         
         /* Loading Animation */
@@ -420,12 +421,12 @@
                 right: 3rem;
             }
             
-            .search-stats {
+            .history-btn {
                 position: relative;
                 top: auto;
                 left: auto;
                 margin: 1rem 3rem;
-                text-align: center;
+                justify-content: center;
             }
             
             .corner-logo {
@@ -463,7 +464,7 @@
                 border: 0.1rem solid rgba(255, 255, 255, 0.1);
             }
             
-            .search-stats {
+            .history-btn {
                 background: rgba(30, 30, 30, 0.8);
                 border: 0.05rem solid rgba(255, 255, 255, 0.1);
                 color: #ccc;
@@ -472,26 +473,30 @@
     </style>
 </head>
 <body>
-    <div class="search-stats">
-        <span id="searchCount">0</span> searches today
+    <div class="history-btn" onclick="toggleHistory()">
+        <i class='bx bx-history'></i>
+        <span id="searchCount">0</span>
     </div>
     
     <main class="search-wrapper">
         <div class="search-box">
             <input type="text" class="search-input" placeholder="Search the web..." required autocomplete="off">
             <select class="search-engine">
-                <option value="google-web">Google (No AI Bullshit)</option>
-                <option value="google-images">Google Images</option>
-                <option value="google-videos">Google Videos</option>
-                <option value="bing">Bing</option>
-                <option value="duckduckgo">DuckDuckGo</option>
-                <option value="yahoo">Yahoo</option>
-                <option value="yandex">Yandex</option>
+                <option value="google-web"><i class='bx bxl-google'></i> Google (No AI Bullshit)</option>
+                <option value="google-images"><i class='bx bxl-google'></i> Google Images</option>
+                <option value="google-videos"><i class='bx bxl-google'></i> Google Videos</option>
+                <option value="bing"><i class='bx bxl-microsoft'></i> Bing</option>
+                <option value="duckduckgo"><i class='bx bx-search'></i> DuckDuckGo</option>
+                <option value="yahoo"><i class='bx bxl-yahoo'></i> Yahoo</option>
+                <option value="yandex"><i class='bx bx-search-alt'></i> Yandex</option>
             </select>
             <div class="shortcut">
                 <span class="key">Ctrl</span>
                 <span class="key">K</span>
             </div>
+            <button class="submit-btn" type="button">
+                <i class='bx bx-search'></i>
+            </button>
             <span class="glint"></span>
             <span class="bottom-glow"></span>
         </div>
@@ -505,8 +510,6 @@
             </div>
             <div id="historyList"></div>
         </div>
-        
-        <button class="submit-btn">Search</button>
     </main>
     
     <a href="https://thekzbn.name.ng" class="corner-logo" target="_blank" rel="noopener noreferrer">
@@ -524,6 +527,7 @@
         const historyPanel = document.getElementById("historyPanel");
         const historyList = document.getElementById("historyList");
         const searchCountEl = document.getElementById("searchCount");
+        const historyBtn = document.querySelector(".history-btn");
         
         // Platform detection
         const isMac = navigator.platform.toUpperCase().includes("MAC");
@@ -595,8 +599,13 @@
         });
         
         input.addEventListener("keypress", (e) => {
-            if (e.key === "Enter" && !suggestionsDropdown.classList.contains("show")) {
-                performSearch();
+            if (e.key === "Enter") {
+                e.preventDefault();
+                if (suggestionsDropdown.classList.contains("show") && currentSuggestionIndex >= 0) {
+                    selectSuggestion(currentSuggestionIndex);
+                } else {
+                    performSearch();
+                }
             }
         });
         
@@ -903,12 +912,12 @@
         }
         
         function showLoading() {
-            submitBtn.innerHTML = 'Searching<span class="loading"></span>';
+            submitBtn.innerHTML = '<span class="loading"></span>';
             submitBtn.disabled = true;
         }
         
         function hideLoading() {
-            submitBtn.innerHTML = 'Search';
+            submitBtn.innerHTML = '<i class="bx bx-search"></i>';
             submitBtn.disabled = false;
         }
         
@@ -923,5 +932,5 @@
             updateSearchCount();
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9927b1a9204b7747',t:'MTc2MTEyMjQ2OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9927b946f5a0ecff',t:'MTc2MTEyMjc4MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
