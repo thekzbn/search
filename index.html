@@ -32,9 +32,11 @@
             background: radial-gradient(circle at top left, #f9f9fb, #e6e8ec);
             overflow-x: hidden;
         }
+        
         .s-mobile {
             display: none;
         }
+        
         .search-wrapper {
             position: relative;
             width: 100%;
@@ -185,11 +187,14 @@
         }
         
         .submit-btn:hover {
-            background: #357ae8;
+            filter: brightness(0.9);
         }
         
-        .submit-btn i {
+        .submit-btn i, .submit-btn svg {
             color: white;
+            width: 1.2rem;
+            height: 1.2rem;
+            vertical-align: middle;
         }
         
         .corner-logo {
@@ -270,6 +275,12 @@
             font-size: 0.9rem;
             opacity: 0.6;
             min-width: 1.2rem;
+        }
+        
+        .suggestion-icon svg {
+            width: 1.2rem;
+            height: 1.2rem;
+            vertical-align: middle;
         }
         
         .suggestion-text {
@@ -631,6 +642,11 @@
                 font-size: 0.9rem;
             }
             
+            .submit-btn svg {
+                width: 1rem;
+                height: 1rem;
+            }
+            
             .history-btn {
                 padding: 0.5rem 0.8rem;
                 font-size: 0.75rem;
@@ -709,18 +725,28 @@
             <select class="search-engine">
                 <option value="google-web"><i class='bx bxl-google'></i> Google (No AI Bullshit)</option>
                 <option value="google-images"><i class='bx bxl-google'></i> Google Images</option>
-                <option value="google-videos"><i class='bx bxl-google'></i> Google Videos</option>
+                <option value="youtube"><i class='bx bxl-youtube'></i> YouTube</option>
                 <option value="bing"><i class='bx bxl-microsoft'></i> Bing</option>
-                <option value="duckduckgo"><i class='bx bx-search'></i> DuckDuckGo</option>
+                <option value="duckduckgo">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z" fill="#DE5833"/>
+                        <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z" fill="#FFFFFF"/>
+                    </svg> DuckDuckGo
+                </option>
                 <option value="yahoo"><i class='bx bxl-yahoo'></i> Yahoo</option>
-                <option value="yandex"><i class='bx bx-search-alt'></i> Yandex</option>
+                <option value="yandex">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 9.5V20h20V9.5L12 2zm0 2.24L19.5 10v8H4.5v-8L12 4.24z" fill="#FFCC00"/>
+                        <path d="M12 8l-6 6h12l-6-6z" fill="#FFFFFF"/>
+                    </svg> Yandex
+                </option>
             </select>
             <div class="shortcut">
                 <span class="key">Ctrl</span>
                 <span class="key">K</span>
             </div>
             <button class="submit-btn" type="button">
-                <i class='bx bx-search'></i>
+                <i class='bx bxl-google'></i>
             </button>
             <span class="glint"></span>
             <span class="bottom-glow"></span>
@@ -776,152 +802,88 @@
         // Initialize
         updateSearchCount();
         updateHistoryDisplay();
+        updateSubmitButton();
         
-        // Keyboard shortcuts
-        document.addEventListener("keydown", (e) => {
-            // Focus search with Ctrl/Cmd + K
-            if ((isMac && e.metaKey && e.key.toLowerCase() === "k") || 
-                (!isMac && e.ctrlKey && e.key.toLowerCase() === "k")) {
-                e.preventDefault();
-                input.focus();
-                return;
-            }
-            
-            // Show history with Ctrl/Cmd + H
-            if ((isMac && e.metaKey && e.key.toLowerCase() === "h") || 
-                (!isMac && e.ctrlKey && e.key.toLowerCase() === "h")) {
-                e.preventDefault();
-                toggleHistory();
-                return;
-            }
-            
-            // Navigate suggestions with arrow keys
-            if (suggestionsDropdown.classList.contains("show")) {
-                if (e.key === "ArrowDown") {
-                    e.preventDefault();
-                    navigateSuggestions(1);
-                } else if (e.key === "ArrowUp") {
-                    e.preventDefault();
-                    navigateSuggestions(-1);
-                } else if (e.key === "Enter" && currentSuggestionIndex >= 0) {
-                    e.preventDefault();
-                    selectSuggestion(currentSuggestionIndex);
-                } else if (e.key === "Escape") {
-                    hideSuggestions();
-                }
-            }
-        });
-        
-        // Input events
-        input.addEventListener("input", (e) => {
-            const query = e.target.value.trim();
-            if (query.length > 0) {
-                clearTimeout(suggestionTimeout);
-                suggestionTimeout = setTimeout(() => {
-                    showSuggestions(query);
-                }, 150);
-            } else {
-                hideSuggestions();
-            }
-        });
-        
-        input.addEventListener("focus", () => {
-            const query = input.value.trim();
-            if (query.length > 0) {
-                showSuggestions(query);
-            }
-        });
-        
-        input.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") {
-                e.preventDefault();
-                if (suggestionsDropdown.classList.contains("show") && currentSuggestionIndex >= 0) {
-                    selectSuggestion(currentSuggestionIndex);
-                } else {
-                    performSearch();
-                }
-            }
-        });
-        
-        // Click outside to close
-        document.addEventListener("click", (e) => {
-            if (!searchBox.contains(e.target) && !suggestionsDropdown.contains(e.target) && !historyBtn.contains(e.target) && !historyPanel.contains(e.target)) {
-                hideSuggestions();
-                hideHistory();
-            }
-        });
-        
-        // Submit button
-        submitBtn.addEventListener("click", (e) => {
-            e.preventDefault();
-            performSearch();
-        });
-        
-        // History button click handler
-        historyBtn.addEventListener("click", () => {
-            toggleHistory();
-        });
-        
-        // Search functionality
-        function performSearch() {
-            const query = input.value.trim();
-            if (!query) return;
-            
+        // Update submit button icon and color based on selected engine
+        function updateSubmitButton() {
             const engine = engineSelect.value;
-            const url = getSearchUrl(engine, query);
-            
-            // Add to history
-            addToHistory(query, engine);
-            
-            // Update search count
-            searchCount++;
-            localStorage.setItem("searchCount", searchCount.toString());
-            updateSearchCount();
-            
-            // Show loading state
-            showLoading();
-            
-            // Open search
-            setTimeout(() => {
-                const link = document.createElement('a');
-                link.href = url;
-                link.target = '_blank';
-                link.rel = 'noopener noreferrer';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                hideLoading();
-            }, 300);
-            
-            hideSuggestions();
+            const config = {
+                "google-web": { icon: "<i class='bx bxl-google'></i>", color: "#4285F4" },
+                "google-images": { icon: "<i class='bx bxl-google'></i>", color: "#4285F4" },
+                "youtube": { icon: "<i class='bx bxl-youtube'></i>", color: "#FF0000" },
+                "bing": { icon: "<i class='bx bxl-microsoft'></i>", color: "#008373" },
+                "duckduckgo": { 
+                    icon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z" fill="#DE5833"/>
+                        <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z" fill="#FFFFFF"/>
+                    </svg>`, 
+                    color: "#DE5833" 
+                },
+                "yahoo": { icon: "<i class='bx bxl-yahoo'></i>", color: "#410093" },
+                "yandex": { 
+                    icon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 9.5V20h20V9.5L12 2zm0 2.24L19.5 10v8H4.5v-8L12 4.24z" fill="#FFCC00"/>
+                        <path d="M12 8l-6 6h12l-6-6z" fill="#FFFFFF"/>
+                    </svg>`, 
+                    color: "#FFCC00" 
+                }
+            };
+            submitBtn.innerHTML = config[engine].icon;
+            submitBtn.style.backgroundColor = config[engine].color;
         }
         
-        function getSearchUrl(engine, query) {
-            const encodedQuery = encodeURIComponent(query);
-            
-            switch (engine) {
-                case "google-web":
-                    return `https://www.google.com/search?q=${encodedQuery}&udm=14&gl=us&hl=en`;
-                case "google-images":
-                    return `https://www.google.com/search?tbm=isch&q=${encodedQuery}`;
-                case "google-videos":
-                    return `https://www.google.com/search?tbm=vid&q=${encodedQuery}`;
-                case "bing":
-                    return `https://www.bing.com/search?q=${encodedQuery}`;
-                case "duckduckgo":
-                    return `https://duckduckgo.com/?q=${encodedQuery}`;
-                case "yahoo":
-                    return `https://search.yahoo.com/search?p=${encodedQuery}`;
-                case "yandex":
-                    return `https://yandex.com/search/?text=${encodedQuery}`;
-                default:
-                    return `https://www.google.com/search?q=${encodedQuery}&udm=14`;
+        // Listen for engine selection changes
+        engineSelect.addEventListener("change", updateSubmitButton);
+        
+        // Google Autocomplete API
+        async function fetchGoogleSuggestions(query) {
+            const proxy = 'https://corsproxy.io/?';
+            const url = `https://suggestqueries.google.com/complete/search?client=firefox&q=${encodeURIComponent(query)}`;
+            try {
+                const res = await fetch(proxy + url);
+                const data = await res.json();
+                return data[1].slice(0, 5); // Return top 5 suggestions
+            } catch (err) {
+                console.warn("Google suggestions failed:", err);
+                return [];
             }
         }
         
         // Suggestions system
-        function showSuggestions(query) {
-            suggestions = generateSuggestions(query);
+        async function showSuggestions(query) {
+            // Get API suggestions
+            const apiSuggestions = await fetchGoogleSuggestions(query);
+            const historySuggestions = searchHistory
+                .filter(item => item.query.toLowerCase().includes(query.toLowerCase()))
+                .slice(0, 3)
+                .map(item => ({
+                    text: item.query,
+                    type: "history",
+                    icon: "🕒",
+                    action: () => {
+                        input.value = item.query;
+                        engineSelect.value = item.engine;
+                        updateSubmitButton();
+                        performSearch();
+                    }
+                }));
+            
+            const quickSuggestions = getQuickSuggestions(query);
+            
+            suggestions = [
+                ...historySuggestions,
+                ...apiSuggestions.map(text => ({
+                    text,
+                    type: "suggestion",
+                    icon: "🔍",
+                    action: () => {
+                        input.value = text;
+                        performSearch();
+                    }
+                })),
+                ...quickSuggestions
+            ].slice(0, 8);
+            
             if (suggestions.length === 0) {
                 hideSuggestions();
                 return;
@@ -937,33 +899,6 @@
             
             suggestionsDropdown.classList.add("show");
             currentSuggestionIndex = -1;
-        }
-        
-        function generateSuggestions(query) {
-            const suggestions = [];
-            
-            // History-based suggestions
-            const historySuggestions = searchHistory
-                .filter(item => item.query.toLowerCase().includes(query.toLowerCase()))
-                .slice(0, 3)
-                .map(item => ({
-                    text: item.query,
-                    type: "history",
-                    icon: "🕒",
-                    action: () => {
-                        input.value = item.query;
-                        engineSelect.value = item.engine;
-                        performSearch();
-                    }
-                }));
-            
-            suggestions.push(...historySuggestions);
-            
-            // Quick suggestions based on query patterns
-            const quickSuggestions = getQuickSuggestions(query);
-            suggestions.push(...quickSuggestions);
-            
-            return suggestions.slice(0, 6);
         }
         
         function getQuickSuggestions(query) {
@@ -1015,6 +950,135 @@
             performSearch();
         }
         
+        // Input events
+        input.addEventListener("input", (e) => {
+            const query = e.target.value.trim();
+            if (query.length > 0) {
+                clearTimeout(suggestionTimeout);
+                suggestionTimeout = setTimeout(() => showSuggestions(query), 150);
+            } else {
+                hideSuggestions();
+            }
+        });
+        
+        input.addEventListener("focus", () => {
+            const query = input.value.trim();
+            if (query.length > 0) {
+                showSuggestions(query);
+            }
+        });
+        
+        input.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                if (suggestionsDropdown.classList.contains("show") && currentSuggestionIndex >= 0) {
+                    selectSuggestion(currentSuggestionIndex);
+                } else {
+                    performSearch();
+                }
+            }
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener("keydown", (e) => {
+            if ((isMac && e.metaKey && e.key.toLowerCase() === "k") || 
+                (!isMac && e.ctrlKey && e.key.toLowerCase() === "k")) {
+                e.preventDefault();
+                input.focus();
+                return;
+            }
+            
+            if ((isMac && e.metaKey && e.key.toLowerCase() === "h") || 
+                (!isMac && e.ctrlKey && e.key.toLowerCase() === "h")) {
+                e.preventDefault();
+                toggleHistory();
+                return;
+            }
+            
+            if (suggestionsDropdown.classList.contains("show")) {
+                if (e.key === "ArrowDown") {
+                    e.preventDefault();
+                    navigateSuggestions(1);
+                } else if (e.key === "ArrowUp") {
+                    e.preventDefault();
+                    navigateSuggestions(-1);
+                } else if (e.key === "Enter" && currentSuggestionIndex >= 0) {
+                    e.preventDefault();
+                    selectSuggestion(currentSuggestionIndex);
+                } else if (e.key === "Escape") {
+                    hideSuggestions();
+                }
+            }
+        });
+        
+        // Click outside to close
+        document.addEventListener("click", (e) => {
+            if (!searchBox.contains(e.target) && !suggestionsDropdown.contains(e.target) && !historyBtn.contains(e.target) && !historyPanel.contains(e.target)) {
+                hideSuggestions();
+                hideHistory();
+            }
+        });
+        
+        // Submit button
+        submitBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            performSearch();
+        });
+        
+        // History button click handler
+        historyBtn.addEventListener("click", () => {
+            toggleHistory();
+        });
+        
+        // Search functionality
+        function performSearch() {
+            const query = input.value.trim();
+            if (!query) return;
+            
+            const engine = engineSelect.value;
+            const url = getSearchUrl(engine, query);
+            
+            addToHistory(query, engine);
+            searchCount++;
+            localStorage.setItem("searchCount", searchCount.toString());
+            updateSearchCount();
+            
+            showLoading();
+            setTimeout(() => {
+                const link = document.createElement('a');
+                link.href = url;
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                hideLoading();
+                hideSuggestions();
+            }, 300);
+        }
+        
+        function getSearchUrl(engine, query) {
+            const encodedQuery = encodeURIComponent(query);
+            switch (engine) {
+                case "google-web":
+                    return `https://www.google.com/search?q=${encodedQuery}&udm=14&gl=us&hl=en`;
+                case "google-images":
+                    return `https://www.google.com/search?tbm=isch&q=${encodedQuery}`;
+                case "youtube":
+                    return `https://www.youtube.com/results?search_query=${encodedQuery}`;
+                case "bing":
+                    return `https://www.bing.com/search?q=${encodedQuery}`;
+                case "duckduckgo":
+                    return `https://duckduckgo.com/?q=${encodedQuery}`;
+                case "yahoo":
+                    return `https://search.yahoo.com/search?p=${encodedQuery}`;
+                case "yandex":
+                    return `https://yandex.com/search/?text=${encodedQuery}`;
+                default:
+                    return `https://www.google.com/search?q=${encodedQuery}&udm=14`;
+            }
+        }
+        
         function selectSuggestion(index) {
             if (index >= 0 && index < suggestions.length) {
                 suggestions[index].action();
@@ -1024,22 +1088,17 @@
         
         function navigateSuggestions(direction) {
             const items = suggestionsDropdown.querySelectorAll(".suggestion-item");
-            
-            // Remove previous highlight
             if (currentSuggestionIndex >= 0) {
                 items[currentSuggestionIndex].classList.remove("highlighted");
             }
             
-            // Update index
             currentSuggestionIndex += direction;
-            
             if (currentSuggestionIndex < 0) {
                 currentSuggestionIndex = items.length - 1;
             } else if (currentSuggestionIndex >= items.length) {
                 currentSuggestionIndex = 0;
             }
             
-            // Add new highlight
             items[currentSuggestionIndex].classList.add("highlighted");
             items[currentSuggestionIndex].scrollIntoView({ block: "nearest" });
         }
@@ -1058,15 +1117,11 @@
                 date: new Date().toLocaleDateString()
             };
             
-            // Remove duplicate
             searchHistory = searchHistory.filter(item => 
                 !(item.query === query && item.engine === engine)
             );
             
-            // Add to beginning
             searchHistory.unshift(historyItem);
-            
-            // Keep only last 50 searches
             searchHistory = searchHistory.slice(0, 50);
             
             localStorage.setItem("searchHistory", JSON.stringify(searchHistory));
@@ -1091,6 +1146,7 @@
         function repeatSearch(query, engine) {
             input.value = query;
             engineSelect.value = engine;
+            updateSubmitButton();
             hideHistory();
             performSearch();
         }
@@ -1122,7 +1178,6 @@
             }
             hideSuggestions();
             
-            // Show close button on mobile
             const closeBtn = document.querySelector('.close-history');
             if (window.innerWidth <= 768) {
                 closeBtn.style.display = 'flex';
@@ -1130,7 +1185,6 @@
                 closeBtn.style.display = 'none';
             }
             
-            // Prevent body scroll on mobile
             if (window.innerWidth <= 768) {
                 document.body.style.overflow = 'hidden';
             }
@@ -1139,8 +1193,6 @@
         function hideHistory() {
             historyPanel.classList.remove("show");
             historyBackdrop.classList.remove("show");
-            
-            // Restore body scroll
             document.body.style.overflow = '';
         }
         
@@ -1149,7 +1201,7 @@
             const names = {
                 "google-web": "Google",
                 "google-images": "Images",
-                "google-videos": "Videos",
+                "youtube": "YouTube",
                 "bing": "Bing",
                 "duckduckgo": "DuckDuckGo",
                 "yahoo": "Yahoo",
@@ -1181,7 +1233,7 @@
         }
         
         function hideLoading() {
-            submitBtn.innerHTML = '<i class="bx bx-search"></i>';
+            updateSubmitButton();
             submitBtn.disabled = false;
         }
         
