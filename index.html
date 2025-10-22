@@ -1,59 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Search Engine</title>
+    <title>Search the Web | thekzbn</title>
+    <meta name="description"
+        content="Search the web with thekzbn's multi-engine search tool. Choose from Google, YouTube, Bing, DuckDuckGo, Yahoo, or Yandex for fast, reliable results.">
+    <meta name="keywords"
+        content="web search, multi-search engine, Google search, YouTube search, Bing search, DuckDuckGo, Yahoo search, Yandex search, thekzbn">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="thekzbn">
+    <link rel="canonical" href="https://search.thekzbn.name.ng">
+    <meta property="og:title" content="Search the Web | thekzbn">
+    <meta property="og:description"
+        content="Fast and versatile web search with multiple search engines including Google, YouTube, Bing, DuckDuckGo, Yahoo, and Yandex.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://search.thekzbn.name.ng">
+    <meta property="og:image" content="https://thekzbn.name.ng/assets/img/logo.png">
+    <meta property="og:site_name" content="thekzbn Search">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Search the Web | thekzbn">
+    <meta name="twitter:description" content="Search across multiple engines with thekzbn's intuitive search tool.">
+    <meta name="twitter:image" content="https://thekzbn.name.ng/assets/img/logo.png">
+    <link rel="icon" href="https://thekzbn.name.ng/assets/img/favicon.ico" type="image/x-icon">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "thekzbn Search",
+        "url": "https://search.thekzbn.name.ng",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://search.thekzbn.name.ng/?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
 </head>
+
 <body>
-    <button class="history-btn" type="button" aria-label="Toggle search history">
-        <i class='bx bx-history'></i>
-        <span id="searchCount">0</span>
-    </button>
-    
+    <header>
+        <button class="history-btn" type="button" aria-label="Toggle search history">
+            <i class='bx bx-history'></i>
+            <span id="searchCount">0</span>
+        </button>
+    </header>
+
     <div class="history-backdrop" id="historyBackdrop" onclick="hideHistory()"></div>
-    
-    <main class="search-wrapper">
-        <div class="search-box">
-            <input type="text" class="search-input" placeholder="Search the web..." required autocomplete="off">
-            <select class="search-engine">
+
+    <main class="search-wrapper" role="main">
+        <div class="search-box" role="search">
+            <input type="text" class="search-input" placeholder="Search the web..." required autocomplete="off"
+                aria-label="Search query">
+            <select class="search-engine" aria-label="Select search engine">
                 <option value="google-web"><i class='bx bxl-google'></i> Google (No AI Bullshit)</option>
                 <option value="google-images"><i class='bx bxl-google'></i> Google Images</option>
                 <option value="youtube"><i class='bx bxl-youtube'></i> YouTube</option>
                 <option value="bing"><i class='bx bxl-microsoft'></i> Bing</option>
                 <option value="duckduckgo">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z" fill="#DE5833"/>
-                        <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z" fill="#FFFFFF"/>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true">
+                        <path
+                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"
+                            fill="#DE5833" />
+                        <path
+                            d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"
+                            fill="#FFFFFF" />
                     </svg> DuckDuckGo
                 </option>
                 <option value="yahoo"><i class='bx bxl-yahoo'></i> Yahoo</option>
                 <option value="yandex">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2L2 9.5V20h20V9.5L12 2zm0 2.24L19.5 10v8H4.5v-8L12 4.24z" fill="#FFCC00"/>
-                        <path d="M12 8l-6 6h12l-6-6z" fill="#FFFFFF"/>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true">
+                        <path d="M12 2L2 9.5V20h20V9.5L12 2zm0 2.24L19.5 10v8H4.5v-8L12 4.24z" fill="#FFCC00" />
+                        <path d="M12 8l-6 6h12l-6-6z" fill="#FFFFFF" />
                     </svg> Yandex
                 </option>
             </select>
-            <div class="shortcut">
+            <div class="shortcut" aria-hidden="true">
                 <span class="key">Ctrl</span>
                 <span class="key">K</span>
             </div>
-            <button class="submit-btn" type="button">
+            <button class="submit-btn" type="button" aria-label="Submit search">
                 <i class='bx bxl-google'></i>
             </button>
             <span class="glint"></span>
             <span class="bottom-glow"></span>
         </div>
-        
-        <div class="suggestions-dropdown" id="suggestionsDropdown"></div>
-        
-        <div class="history-panel" id="historyPanel">
+
+        <div class="suggestions-dropdown" id="suggestionsDropdown" role="listbox"></div>
+
+        <div class="history-panel" id="historyPanel" role="dialog" aria-label="Search history">
             <div class="history-header">
                 <span class="history-title">Recent Searches</span>
                 <div class="history-buttons">
-                    <button class="close-history" onclick="hideHistory()">
+                    <button class="close-history" onclick="hideHistory()" aria-label="Close history panel">
                         <i class='bx bx-x'></i>
                     </button>
                     <button class="clear-history" onclick="clearSearchHistory()" aria-label="Clear search history">
@@ -61,14 +105,19 @@
                     </button>
                 </div>
             </div>
-            <div id="historyList"></div>
+            <div id="historyList" role="list"></div>
         </div>
     </main>
-    
-    <a href="https://thekzbn.name.ng" class="corner-logo" target="_blank" rel="noopener noreferrer">
-        <img src="https://thekzbn.name.ng/assets/img/logo.png" alt="@thekzbn Logo" onerror="this.src=''; this.alt='Logo failed to load'; this.style.display='none';">
-    </a>
-    <script src="assets/js/script.js"></script>
- 
+
+    <footer>
+        <a href="https://thekzbn.name.ng" class="corner-logo" target="_blank" rel="noopener noreferrer"
+            aria-label="Visit thekzbn homepage">
+            <img src="https://thekzbn.name.ng/assets/img/logo.png" alt="thekzbn logo"
+                onerror="this.src=''; this.alt='Logo failed to load'; this.style.display='none';">
+        </a>
+    </footer>
+
+    <script src="assets/js/script.js" defer></script>
 </body>
+
 </html>
