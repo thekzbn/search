@@ -30,6 +30,7 @@
             justify-content: center;
             align-items: center;
             background: radial-gradient(circle at top left, #f9f9fb, #e6e8ec);
+            overflow-x: hidden;
         }
         
         .search-wrapper {
@@ -183,6 +184,10 @@
         
         .submit-btn:hover {
             background: #357ae8;
+        }
+        
+        .submit-btn i {
+            color: white;
         }
         
         .corner-logo {
@@ -410,23 +415,54 @@
         }
         
         /* Mobile Responsive */
-        @media screen and (max-width: 687px) {
+        @media screen and (max-width: 768px) {
+            html, body {
+                padding: 1rem;
+                align-items: flex-start;
+                padding-top: 4rem;
+            }
+            
+            .search-wrapper {
+                width: 100%;
+                max-width: none;
+            }
+            
             .search-box {
-                margin: 3rem;
-                margin-top: 0;
-                margin-bottom: 0;
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .search-input {
+                width: 100%;
+                padding: 1rem;
+                border-bottom: 0.1rem solid rgba(0, 0, 0, 0.08);
+            }
+            
+            .search-engine {
+                width: 100%;
+                padding: 1rem;
+                border-left: none;
+                border-bottom: 0.1rem solid rgba(0, 0, 0, 0.08);
+            }
+            
+            .shortcut {
+                display: none;
             }
             
             .submit-btn {
-                right: 3rem;
+                width: 100%;
+                padding: 1rem;
+                border-left: none;
+                font-size: 1rem;
             }
             
             .history-btn {
-                position: relative;
-                top: auto;
-                left: auto;
-                margin: 1rem 3rem;
-                justify-content: center;
+                position: fixed;
+                top: 1rem;
+                left: 1rem;
+                right: auto;
+                padding: 0.6rem 1rem;
+                font-size: 0.8rem;
             }
             
             .corner-logo {
@@ -435,7 +471,117 @@
             }
             
             .corner-logo img {
-                height: 4rem;
+                height: 3rem;
+            }
+            
+            .suggestions-dropdown {
+                margin-top: 0.5rem;
+            }
+            
+            .history-panel {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(255, 255, 255, 0.98);
+                backdrop-filter: blur(2rem) saturate(180%);
+                border: none;
+                border-radius: 0;
+                margin: 0;
+                padding: 2rem 1rem;
+                z-index: 100;
+                overflow-y: auto;
+            }
+            
+            .history-panel.show {
+                opacity: 1;
+                transform: translateY(0);
+                pointer-events: all;
+            }
+            
+            .history-header {
+                margin-bottom: 1.5rem;
+                padding-bottom: 1rem;
+                position: relative;
+            }
+            
+            .history-title {
+                font-size: 1.2rem;
+            }
+            
+            .clear-history {
+                font-size: 0.9rem;
+                padding: 0.5rem 1rem;
+            }
+            
+            .close-history {
+                position: absolute;
+                top: -1rem;
+                right: 0;
+                background: none;
+                border: none;
+                font-size: 1.5rem;
+                color: #666;
+                cursor: pointer;
+                padding: 0.5rem;
+                border-radius: 0.5rem;
+                transition: all 0.2s ease;
+            }
+            
+            .close-history:hover {
+                background: rgba(0, 0, 0, 0.1);
+                color: #333;
+            }
+            
+            .history-item {
+                padding: 1rem;
+                margin-bottom: 0.5rem;
+                border-radius: 0.8rem;
+                background: rgba(0, 0, 0, 0.02);
+            }
+            
+            .history-query {
+                font-size: 1rem;
+            }
+            
+            .history-engine {
+                font-size: 0.8rem;
+            }
+            
+            .history-time {
+                font-size: 0.75rem;
+            }
+        }
+        
+        @media screen and (max-width: 480px) {
+            html, body {
+                padding: 0.5rem;
+                padding-top: 3rem;
+            }
+            
+            .search-input {
+                font-size: 1rem;
+                padding: 0.9rem;
+            }
+            
+            .search-engine {
+                font-size: 0.9rem;
+                padding: 0.9rem;
+            }
+            
+            .submit-btn {
+                padding: 0.9rem;
+                font-size: 0.9rem;
+            }
+            
+            .history-btn {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.75rem;
+            }
+            
+            .corner-logo img {
+                height: 2.5rem;
             }
         }
         
@@ -505,6 +651,9 @@
         
         <div class="history-panel" id="historyPanel">
             <div class="history-header">
+                <button class="close-history" onclick="hideHistory()" style="display: none;">
+                    <i class='bx bx-x'></i>
+                </button>
                 <span class="history-title">Recent Searches</span>
                 <button class="clear-history" onclick="clearSearchHistory()">Clear All</button>
             </div>
@@ -874,6 +1023,14 @@
             updateHistoryDisplay();
             historyPanel.classList.add("show");
             hideSuggestions();
+            
+            // Show close button on mobile
+            const closeBtn = document.querySelector('.close-history');
+            if (window.innerWidth <= 768) {
+                closeBtn.style.display = 'block';
+            } else {
+                closeBtn.style.display = 'none';
+            }
         }
         
         function hideHistory() {
@@ -932,5 +1089,4 @@
             updateSearchCount();
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9927b946f5a0ecff',t:'MTc2MTEyMjc4MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
