@@ -32,7 +32,9 @@
             background: radial-gradient(circle at top left, #f9f9fb, #e6e8ec);
             overflow-x: hidden;
         }
-        
+        .s-mobile{
+            display: none;
+        }
         .search-wrapper {
             position: relative;
             width: 100%;
@@ -593,7 +595,6 @@
                 font-size: 0.8rem;
             }
             
-            /* Hide backdrop on mobile */
             .history-backdrop {
                 display: none;
             }
@@ -628,9 +629,11 @@
             .corner-logo img {
                 height: 2.5rem;
             }
+             .s-mobile{
+                display: block;
+            }
         }
         
-        /* Dark mode support */
         @media (prefers-color-scheme: dark) {
             html, body {
                 background: radial-gradient(circle at top left, #1a1a1a, #0f0f0f);
@@ -701,6 +704,10 @@
                 <button class="close-history" onclick="hideHistory()">
                     <i class='bx bx-x'></i>
                 </button>
+                <div class="s-mobile">
+                    <br>
+                <br>
+                </div>
                 <span class="history-title">Recent Searches</span>
                 <button class="clear-history" onclick="clearSearchHistory()">Clear All</button>
             </div>
