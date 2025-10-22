@@ -566,17 +566,18 @@
             .close-history {
                 background: rgba(0, 0, 0, 0.05);
                 border: none;
-                font-size: 1rem;
+                font-size: 1.2rem;
                 color: #666;
                 cursor: pointer;
-                padding: 0.5rem;
-                border-radius: 0.5rem;
+                padding: 0.6rem;
+                border-radius: 0.6rem;
                 transition: all 0.2s ease;
-                width: 2rem;
-                height: 2rem;
+                width: 2.5rem;
+                height: 2.5rem;
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                visibility: visible;
             }
             
             .close-history:hover {
@@ -654,6 +655,12 @@
             
             .corner-logo img {
                 height: 2.5rem;
+            }
+            
+            .close-history {
+                font-size: 1rem;
+                width: 2rem;
+                height: 2rem;
             }
         }
         
@@ -1179,11 +1186,7 @@
             hideSuggestions();
             
             const closeBtn = document.querySelector('.close-history');
-            if (window.innerWidth <= 768) {
-                closeBtn.style.display = 'flex';
-            } else {
-                closeBtn.style.display = 'none';
-            }
+            closeBtn.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
             
             if (window.innerWidth <= 768) {
                 document.body.style.overflow = 'hidden';
