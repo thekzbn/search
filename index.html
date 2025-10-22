@@ -709,7 +709,7 @@
         
         <div class="history-panel" id="historyPanel">
             <div class="history-header">
-                <button class="close-history" onclick="hideHistory()" style="display: none;">
+                <button class="close-history" onclick="hideHistory()">
                     <i class='bx bx-x'></i>
                 </button>
                 <span class="history-title">Recent Searches</span>
@@ -750,6 +750,7 @@
         
         // Initialize
         updateSearchCount();
+        updateHistoryDisplay();
         
         // Keyboard shortcuts
         document.addEventListener("keydown", (e) => {
@@ -891,7 +892,7 @@
                 case "yandex":
                     return `https://yandex.com/search/?text=${encodedQuery}`;
                 default:
-                    return `https://www.google.com/search?q=${encodedQuery}`;
+                    return `https://www.google.com/search?q=${encodedQuery}&udm=14`;
             }
         }
         
@@ -967,7 +968,7 @@
             
             // Add common suffixes
             const suffixes = [
-                { suffix: " 2024", icon: "📅", type: "recent" },
+                { suffix: " 2025", icon: "📅", type: "recent" },
                 { suffix: " review", icon: "⭐", type: "review" },
                 { suffix: " vs", icon: "⚖️", type: "compare" }
             ];
@@ -1075,9 +1076,14 @@
             searchHistory = [];
             localStorage.removeItem("searchHistory");
             updateHistoryDisplay();
+            hideHistory();
         }
         
         function toggleHistory() {
+            if (searchHistory.length === 0) {
+                historyList.innerHTML = '<div style="text-align: center; opacity: 0.5; padding: 2rem;">No search history yet</div>';
+                return;
+            }
             if (historyPanel.classList.contains("show")) {
                 hideHistory();
             } else {
@@ -1088,7 +1094,9 @@
         function showHistory() {
             updateHistoryDisplay();
             historyPanel.classList.add("show");
-            historyBackdrop.classList.add("show");
+            if (window.innerWidth > 768) {
+                historyBackdrop.classList.add("show");
+            }
             hideSuggestions();
             
             // Show close button on mobile
@@ -1165,4 +1173,5 @@
             updateSearchCount();
         }
     </script>
+</body>
 </html>
