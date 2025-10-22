@@ -675,10 +675,10 @@
     </style>
 </head>
 <body>
-    <div class="history-btn" onclick="toggleHistory()">
+    <button class="history-btn" type="button" aria-label="Toggle search history">
         <i class='bx bx-history'></i>
         <span id="searchCount">0</span>
-    </div>
+    </button>
     
     <div class="history-backdrop" id="historyBackdrop" onclick="hideHistory()"></div>
     
@@ -833,9 +833,7 @@
         });
         
         // History button click handler
-        historyBtn.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
+        historyBtn.addEventListener("click", () => {
             toggleHistory();
         });
         
