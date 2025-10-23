@@ -19,9 +19,11 @@
     <meta name="twitter:title" content="Search the Web | thekzbn">
     <meta name="twitter:description" content="Search across multiple engines with thekzbn's intuitive search tool.">
     <meta name="twitter:image" content="https://thekzbn.name.ng/assets/img/logo.png">
-    <link rel="icon" href="https://thekzbn.name.ng/assets/img/favicon.ico" type="image/x-icon">
+    <link rel="search" type="application/opensearchdescription+xml" title="Search" href="/opensearch.xml">
+    <link rel="icon" href="assets/img/logo.png" type="image/png">
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -38,6 +40,7 @@
 </head>
 <body>
     <header>
+        <div id="google_translate_element" style="position: fixed; top: 10px; right: 10px; z-index: 9999;"></div>
         <button class="history-btn" type="button" aria-label="Toggle search history">
             <i class='bx bx-history'></i>
             <span id="searchCount">0</span>

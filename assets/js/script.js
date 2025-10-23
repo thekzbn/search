@@ -71,6 +71,9 @@ async function fetchGoogleSuggestions(query) {
 }
 
 async function showSuggestions(query) {
+    input.setAttribute('aria-expanded', 'true');
+    input.setAttribute('aria-controls', 'suggestionsDropdown');
+
     const apiSuggestions = await fetchGoogleSuggestions(query);
     const historySuggestions = searchHistory
         .filter(item => item.query.toLowerCase().includes(query.toLowerCase()))
@@ -109,7 +112,7 @@ async function showSuggestions(query) {
     }
     
     suggestionsDropdown.innerHTML = suggestions.map((suggestion, index) => `
-        <div class="suggestion-item" data-index="${index}" onclick="selectSuggestion(${index})" role="option">
+        <div class="suggestion-item" id="suggestion-${index}" data-index="${index}" onclick="selectSuggestion(${index})" role="option" tabindex="0">
             <span class="suggestion-icon">${suggestion.icon}</span>
             <span class="suggestion-text">${suggestion.text}</span>
             <span class="suggestion-type">${suggestion.type}</span>
@@ -311,6 +314,7 @@ function navigateSuggestions(direction) {
     const items = suggestionsDropdown.querySelectorAll(".suggestion-item");
     if (currentSuggestionIndex >= 0) {
         items[currentSuggestionIndex].classList.remove("highlighted");
+        items[currentSuggestionIndex].removeAttribute('aria-selected');
     }
     
     currentSuggestionIndex += direction;
@@ -321,12 +325,16 @@ function navigateSuggestions(direction) {
     }
     
     items[currentSuggestionIndex].classList.add("highlighted");
+    items[currentSuggestionIndex].setAttribute('aria-selected', 'true');
     items[currentSuggestionIndex].scrollIntoView({ block: "nearest" });
+    input.setAttribute('aria-activedescendant', items[currentSuggestionIndex].id);
 }
 
 function hideSuggestions() {
     suggestionsDropdown.classList.remove("show");
     currentSuggestionIndex = -1;
+    input.setAttribute('aria-expanded', 'false');
+    input.removeAttribute('aria-activedescendant');
 }
 
 function addToHistory(query, engine) {
@@ -465,4 +473,8 @@ if (lastResetDate !== today) {
     localStorage.setItem("searchCount", "0");
     localStorage.setItem("lastResetDate", today);
     updateSearchCount();
+}
+
+function googleTranslateElementInit() {
+    new google.translate.TranslateElement({pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE}, 'google_translate_element');
 }
