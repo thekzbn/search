@@ -478,3 +478,59 @@ if (lastResetDate !== today) {
 function googleTranslateElementInit() {
     new google.translate.TranslateElement({pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE}, 'google_translate_element');
 }
+
+// Default Search Engine Banner Logic
+const defaultSearchBanner = document.getElementById('defaultSearchBanner');
+const dismissBannerBtn = document.querySelector('.dismiss-banner');
+const addSearchEngineLink = document.getElementById('addSearchEngineLink');
+
+function showDefaultSearchBanner() {
+    if (localStorage.getItem('dismissDefaultSearchBanner') !== 'true') {
+        defaultSearchBanner.style.display = 'flex';
+    }
+}
+
+function hideDefaultSearchBanner() {
+    console.log('Attempting to hide banner and set localStorage.');
+    defaultSearchBanner.style.display = 'none';
+    localStorage.setItem('dismissDefaultSearchBanner', 'true');
+    console.log('Banner hidden, localStorage set.');
+}
+
+if (dismissBannerBtn) {
+    dismissBannerBtn.addEventListener('click', hideDefaultSearchBanner);
+} else {
+    console.error('Dismiss banner button not found!');
+}
+
+addSearchEngineLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    // Attempt to add the OpenSearch provider
+    if ('sidebar' in window && 'addSearchEngine' in window.sidebar) {
+        window.sidebar.addSearchEngine(
+            '/opensearch.xml',
+            'assets/img/logo.png',
+            'Search',
+            'Search the web with a custom search engine.'
+        );
+    } else {
+        alert('Your browser does not support adding search engines directly. Please refer to your browser's settings to add a custom search engine using the URL of this page.');
+    }
+    hideDefaultSearchBanner();
+});
+
+// Show banner after a short delay to ensure page is loaded
+window.addEventListener('load', () => {
+    setTimeout(showDefaultSearchBanner, 1000);
+
+    // Check for 'q' parameter in URL for default search engine functionality
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryFromUrl = urlParams.get('q');
+
+    if (queryFromUrl) {
+        input.value = queryFromUrl;
+        // Optionally, you could try to set a preferred engine here if stored, 
+        // otherwise, it will use the default selected in the HTML.
+        performSearch();
+    }
+});

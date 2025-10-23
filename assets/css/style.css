@@ -627,50 +627,6 @@ body {
     }
 }
 
-@media screen and (max-width: 480px) {
-
-    html,
-    body {
-        padding: 0.5rem;
-        padding-top: 3rem;
-    }
-
-    .search-input {
-        font-size: 1rem;
-        padding: 0.9rem;
-    }
-
-    .search-engine {
-        font-size: 0.9rem;
-        padding: 0.9rem;
-    }
-
-    .submit-btn {
-        padding: 0.9rem;
-        font-size: 0.9rem;
-    }
-
-    .submit-btn svg {
-        width: 1rem;
-        height: 1rem;
-    }
-
-    .history-btn {
-        padding: 0.5rem 0.8rem;
-        font-size: 0.75rem;
-    }
-
-    .corner-logo img {
-        height: 2.5rem;
-    }
-
-    .close-history {
-        font-size: 1rem;
-        width: 2rem;
-        height: 2rem;
-    }
-}
-
 @media (prefers-color-scheme: dark) {
 
     html,
@@ -723,5 +679,151 @@ body {
     .close-history:hover {
         background: rgba(255, 255, 255, 0.2);
         color: #e0e0e0;
+    }
+}
+
+.default-search-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #4285f4;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.default-search-banner p {
+    margin: 0;
+    color: white;
+}
+
+.default-search-banner a {
+    color: #e6e6e6;
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+.default-search-banner a:hover {
+    color: white;
+}
+
+.dismiss-banner {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.2em;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.dismiss-banner:hover {
+    color: #ccc;
+}
+
+@media screen and (max-width: 768px) {
+    .default-search-banner {
+        flex-direction: column;
+        padding: 15px 10px;
+        gap: 5px;
+    }
+
+    .dismiss-banner {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        margin-left: 0;
+    }
+}
+@media screen and (max-width: 480px) {
+
+    html,
+    body {
+        padding: 0.5rem;
+        padding-top: 3rem;
+    }
+
+    .search-input {
+        font-size: 1rem;
+        padding: 0.9rem;
+    }
+
+    .search-engine {
+        font-size: 0.9rem;
+        padding: 0.9rem;
+    }
+
+    .submit-btn {
+        padding: 0.9rem;
+        font-size: 0.9rem;
+    }
+
+    .submit-btn svg {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    .history-btn {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.75rem;
+    }
+
+    .corner-logo img {
+        height: 2.5rem;
+    }
+
+    .close-history {
+        font-size: 1rem;
+        width: 2rem;
+        height: 2rem;
+    }
+}
+@media screen and (max-width: 480px) {
+
+    html,
+    body {
+        padding: 0.5rem;
+        padding-top: 3rem;
+    }
+
+    .search-input {
+        font-size: 1rem;
+        padding: 0.9rem;
+    }
+
+    .search-engine {
+        font-size: 0.9rem;
+        padding: 0.9rem;
+    }
+
+    .submit-btn {
+        padding: 0.9rem;
+        font-size: 0.9rem;
+    }
+
+    .submit-btn svg {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    .history-btn {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.75rem;
+    }
+
+    .corner-logo img {
+        height: 2.5rem;
+    }
+
+    .close-history {
+        font-size: 1rem;
+        width: 2rem;
+        height: 2rem;
     }
 }
